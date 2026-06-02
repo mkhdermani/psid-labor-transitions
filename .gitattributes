@@ -1,0 +1,20 @@
+# Normalize text line endings inside the repo; check out native on each OS.
+* text=auto
+
+# Source files are text
+*.do   text
+*.R    text
+*.Rmd  text
+*.jl   text
+*.py   text
+*.tex  text
+*.md   text
+*.txt  text
+
+# Binary assets (no diffing / EOL conversion)
+*.png  binary
+*.pdf  binary
+*.xlsx binary
+*.dta  binary
+*.gz   binary
+*.zip  binary

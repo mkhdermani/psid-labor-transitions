@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you refer to this work, please cite it as below."
+title: "Labour-Market Transitions & Wealth Dynamics"
+abstract: >-
+  Research-assistant work in empirical labour economics: harmonised individual
+  panels built from the PSID, NLSY79, NLSY97 and CPS surveys to estimate
+  employment / unemployment / inactivity transition rates and income & wealth
+  trajectories, validated against FRED and the Fallick & Fleischman and Shimer
+  benchmarks. Code, result graphs and reports only (microdata excluded).
+type: software
+authors:
+  - family-names: "Khalili"
+    given-names: "Mohsen"
+    email: mkhdermani@gmail.com
+keywords:
+  - labour economics
+  - panel data
+  - PSID
+  - NLSY
+  - CPS
+  - transition rates
+  - Stata
+  - R
+license: MIT
+date-released: "2026-06-02"
