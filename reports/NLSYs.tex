@@ -1,0 +1,727 @@
+\documentclass{article}  % Use your preferred document class
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{float}       % For the [H] option
+\usepackage{geometry}    % Optional: To adjust page margins
+\usepackage{caption}     % For caption styling
+
+% Define the graphics path (adjust as necessary)
+\graphicspath{{D:/PSID_SHELF/}}
+
+% Custom command to create figure sets
+\newcommand{\createFigureSet}[7]{%
+	\begin{figure}[H]
+		\centering
+		% Subfigure 1
+		\begin{subfigure}{0.9\textwidth}
+			\centering
+			\includegraphics[width=\textwidth, height=0.35\textheight]{#1}
+			\caption{#2}
+			\label{#3}
+		\end{subfigure}
+		\vspace{0.05\textheight}
+		% Subfigure 2
+		\begin{subfigure}{0.9\textwidth}
+			\centering
+			\includegraphics[width=\textwidth, height=0.35\textheight]{#4}
+			\caption{#5}
+			\label{#6}
+		\end{subfigure}
+		\vspace{0.05\textheight}
+		% Main figure caption (optional)
+		\caption{#7}
+		\label{fig:#3_#6}
+	\end{figure}
+	\newpage % Move to the next page after each figure set
+}
+
+\title{Analysis of Employment Transition Rates}
+\author{Mohsen Khalili}
+\date{\today}
+
+\begin{document}
+	\maketitle
+	\tableofcontents
+	\newpage
+	\section{Introduction}
+	
+	In this study, I use data from the Current Population Survey (CPS) to compare with the National Longitudinal Survey of Youth 1979 (NLSY79) and the National Longitudinal Survey of Youth 1997 (NLSY97). I also apply your formula to compare the data as part of the analysis.
+	
+	Furthermore, I compare the results obtained from the NLSY79 and NLSY97 datasets with the findings of Fallick and Fleischman. I follow their methodology by using the mean average for the comparison, as they utilized this approach in their study.
+	
+	To facilitate easy comparison, I have compiled the mean transition rates in a table, which summarizes the key findings.
+	\subsection{Comparison of Mean Transition Rates}
+	
+	The following table presents a comparison of the mean transition rates across the NLSY79, NLSY97, and Fallick and Fleischman datasets:
+	
+	\newpage
+	\begin{table}[H]
+		\centering
+		\caption{Comparison of Mean Transition Rates with Fallick and Fleischman }
+		\label{tab:mean_transition_comparison}
+		\begin{tabular}{|l|c|c|c|}
+			\hline
+			\textbf{Transition}                      & \textbf{NLSY79} & \textbf{NLSY97} & \textbf{Fallick and Fleischman} \\ \hline
+			Employment to Unemployment (EU)          & 0.0015739       & 0.001537337     & 0.00775                         \\ \hline
+			Unemployment to Employment (UE)          & 0.001678105     & 0.001394249     & 0.008819079                     \\ \hline
+			Employment to Inactive (EI)              & 0.003438349     & 0.004574922     & 0.01653947                      \\ \hline
+			Inactive to Employment (IE)              & 0.003369417     & 0.005250601     & 0.01538158                      \\ \hline
+			Unemployment to Inactive (UI)            & 0.001324598     & 0.002663192     & 0.008276316                     \\ \hline
+			Inactive to Unemployment (IU)            & 0.001411334     & 0.002490217     & 0.008378289                     \\ \hline
+		\end{tabular}
+	\end{table}
+	
+	\begin{table}[H]
+		\centering
+		\caption{Comparison of Mean Transition Rates with BLS}
+		\label{tab:mean_transition_comparison}
+		\begin{tabular}{|l|c|c|c|}
+			\hline
+			\textbf{Transition}                      & \textbf{NLSY79} & \textbf{NLSY97} & \textbf{BLS} \\ \hline
+			Employment to Unemployment (EU)          & 0.002236004     &  0.002478633     & 0.01375252                         \\ \hline
+			Unemployment to Employment (UE)          & 0.03726451   & 0.02760789     & 0.2954659                    \\ \hline
+			Employment to Inactive (EI)              &  0.004961773     & 0.009702717     & 0.02822435                      \\ \hline
+			Inactive to Employment (IE)              & 0.0271262     & 0.02563242     & 0.0271262                      \\ \hline
+			Unemployment to Inactive (UI)            & 0.01748642     & 0.05497627     & 0.2531589                     \\ \hline
+			Inactive to Unemployment (IU)            & 0.006918608     & 0.01110536     & 0.02599414                     \\ \hline
+		\end{tabular}
+	\end{table}	
+	\newpage
+	
+	\section{NLSY79}
+	
+	\subsection{With Two Y-Axes: Fallick and Fleischman}
+	
+	% Figure Set 1: UE and EU
+	\createFigureSet{%
+		02_NLSY79/output/Mean_Compare/tr_UE_dual_axis%
+	}{%
+		Transition from Unemployment to Employment (UE).%
+	}{%
+		fig:tr_UE_dual_axis%
+	}{%
+		02_NLSY79/output/Mean_Compare/tr_EU_dual_axis%
+	}{%
+		Transition from Employment to Unemployment (EU).%
+	}{%
+		fig:tr_EU_dual_axis%
+	}{%
+		Comparison of UE and EU transitions with dual Y-axes according to Fallick and Fleischman.%
+	}
+	
+	% Figure Set 2: EI and IE
+	\createFigureSet{%
+		02_NLSY79/output/Mean_Compare/tr_EI_dual_axis%
+	}{%
+		Transition from Employment to Inactive (EI).%
+	}{%
+		fig:tr_EI_dual_axis%
+	}{%
+		02_NLSY79/output/Mean_Compare/tr_IE_dual_axis%
+	}{%
+		Transition from Inactive to Employment (IE).%
+	}{%
+		fig:tr_IE_dual_axis%
+	}{%
+		Comparison of EI and IE transitions with dual Y-axes according to Fallick and Fleischman.%
+	}
+	
+	% Figure Set 3: UI and IU
+	\createFigureSet{%
+		02_NLSY79/output/Mean_Compare/tr_UI_dual_axis%
+	}{%
+		Transition from Unemployment to Inactive (UI).%
+	}{%
+		fig:tr_UI_dual_axis%
+	}{%
+		02_NLSY79/output/Mean_Compare/tr_IU_dual_axis%
+	}{%
+		Transition from Inactive to Unemployment (IU).%
+	}{%
+		fig:tr_IU_dual_axis%
+	}{%
+		Comparison of UI and IU transitions with dual Y-axes according to Fallick and Fleischman.%
+	}
+	
+	\subsection{Without Two Y-Axes: Fallick and Fleischman}
+	
+	% Figure Set 4: UE and EU
+	\createFigureSet{%
+		02_NLSY79/output/Mean_Compare/tr_UE_vs_Fallick_and_Fleischman%
+	}{%
+		Transition from Unemployment to Employment (UE).%
+	}{%
+		fig:tr_UE_vs_FF%
+	}{%
+		02_NLSY79/output/Mean_Compare/tr_EU_vs_Fallick_and_Fleischman%
+	}{%
+		Transition from Employment to Unemployment (EU).%
+	}{%
+		fig:tr_EU_vs_FF%
+	}{%
+		UE and EU transitions compared to Fallick and Fleischman without dual Y-axes.%
+	}
+	
+	% Figure Set 5: EI and IE
+	\createFigureSet{%
+		02_NLSY79/output/Mean_Compare/tr_EI_vs_Fallick_and_Fleischman%
+	}{%
+		Transition from Employment to Inactive (EI).%
+	}{%
+		fig:tr_EI_vs_FF%
+	}{%
+		02_NLSY79/output/Mean_Compare/tr_IE_vs_Fallick_and_Fleischman%
+	}{%
+		Transition from Inactive to Employment (IE).%
+	}{%
+		fig:tr_IE_vs_FF%
+	}{%
+		EI and IE transitions compared to Fallick and Fleischman without dual Y-axes.%
+	}
+	
+	% Figure Set 6: UI and IU
+	\createFigureSet{%
+		02_NLSY79/output/Mean_Compare/tr_UI_vs_Fallick_and_Fleischman%
+	}{%
+		Transition from Unemployment to Inactive (UI).%
+	}{%
+		fig:tr_UI_vs_FF%
+	}{%
+		02_NLSY79/output/Mean_Compare/tr_IU_vs_Fallick_and_Fleischman%
+	}{%
+		Transition from Inactive to Unemployment (IU).%
+	}{%
+		fig:tr_IU_vs_FF%
+	}{%
+		UI and IU transitions compared to Fallick and Fleischman without dual Y-axes.%
+	}
+	
+	\subsection{Facet Graph: Fallick and Fleischman}
+	
+	% Figure Set 7: UE and EU
+	\createFigureSet{%
+		02_NLSY79/output/Mean_Compare/tr_UE_facets_axis%
+	}{%
+		Transition from Unemployment to Employment (UE).%
+	}{%
+		fig:tr_UE_facets_axis%
+	}{%
+		02_NLSY79/output/Mean_Compare/tr_EU_facets_axis%
+	}{%
+		Transition from Employment to Unemployment (EU).%
+	}{%
+		fig:tr_EU_facets_axis%
+	}{%
+		UE and EU transitions using facet graphs according to Fallick and Fleischman.%
+	}
+	
+	% Figure Set 8: EI and IE
+	\createFigureSet{%
+		02_NLSY79/output/Mean_Compare/tr_EI_facets_axis%
+	}{%
+		Transition from Employment to Inactive (EI).%
+	}{%
+		fig:tr_EI_facets_axis%
+	}{%
+		02_NLSY79/output/Mean_Compare/tr_IE_facets_axis%
+	}{%
+		Transition from Inactive to Employment (IE).%
+	}{%
+		fig:tr_IE_facets_axis%
+	}{%
+		EI and IE transitions using facet graphs according to Fallick and Fleischman.%
+	}
+	
+	% Figure Set 9: UI and IU
+	\createFigureSet{%
+		02_NLSY79/output/Mean_Compare/tr_UI_facets_axis%
+	}{%
+		Transition from Unemployment to Inactive (UI).%
+	}{%
+		fig:tr_UI_facets_axis%
+	}{%
+		02_NLSY79/output/Mean_Compare/tr_IU_facets_axis%
+	}{%
+		Transition from Inactive to Unemployment (IU).%
+	}{%
+		fig:tr_IU_facets_axis%
+	}{%
+		UI and IU transitions using facet graphs according to Fallick and Fleischman.%
+	}
+	
+	\subsection{Without Two Y-Axes: BLS}
+	
+	% Figure Set 10: EU and UE
+	\createFigureSet{%
+		02_NLSY79/output/tr_EU_vs_bls_single_axis%
+	}{%
+		Transition from Employment to Unemployment (EU) vs. BLS data.%
+	}{%
+		fig:tr_EU_vs_bls_single%
+	}{%
+		02_NLSY79/output/tr_UE_vs_bls_single_axis%
+	}{%
+		Transition from Unemployment to Employment (UE) vs. BLS data.%
+	}{%
+		fig:tr_UE_vs_bls_single%
+	}{%
+		EU and UE transitions compared to BLS data without dual Y-axes.%
+	}
+	
+	% Figure Set 11: EI and IE
+	\createFigureSet{%
+		02_NLSY79/output/tr_EI_vs_bls_single_axis%
+	}{%
+		Transition from Employment to Inactive (EI) vs. BLS data.%
+	}{%
+		fig:tr_EI_vs_bls_single%
+	}{%
+		02_NLSY79/output/tr_IE_vs_bls_single_axis%
+	}{%
+		Transition from Inactive to Employment (IE) vs. BLS data.%
+	}{%
+		fig:tr_IE_vs_bls_single%
+	}{%
+		EI and IE transitions compared to BLS data without dual Y-axes.%
+	}
+	
+	% Figure Set 12: UI and IU
+	\createFigureSet{%
+		02_NLSY79/output/tr_UI_vs_bls_single_axis%
+	}{%
+		Transition from Unemployment to Inactive (UI) vs. BLS data.%
+	}{%
+		fig:tr_UI_vs_bls_single%
+	}{%
+		02_NLSY79/output/tr_IU_vs_bls_single_axis%
+	}{%
+		Transition from Inactive to Unemployment (IU) vs. BLS data.%
+	}{%
+		fig:tr_IU_vs_bls_single%
+	}{%
+		UI and IU transitions compared to BLS data without dual Y-axes.%
+	}
+	
+	\subsection{With Two Y-Axes: BLS}
+	
+	% Figure Set 13: EU and UE
+	\createFigureSet{%
+		02_NLSY79/output/tr_EU_vs_bls%
+	}{%
+		Transition from Employment to Unemployment (EU) vs. BLS data.%
+	}{%
+		fig:tr_EU_vs_bls%
+	}{%
+		02_NLSY79/output/tr_UE_vs_bls%
+	}{%
+		Transition from Unemployment to Employment (UE) vs. BLS data.%
+	}{%
+		fig:tr_UE_vs_bls%
+	}{%
+		EU and UE transitions compared to BLS data with dual Y-axes.%
+	}
+	
+	% Figure Set 14: EI and IE
+	\createFigureSet{%
+		02_NLSY79/output/tr_EI_vs_bls%
+	}{%
+		Transition from Employment to Inactive (EI) vs. BLS data.%
+	}{%
+		fig:tr_EI_vs_bls%
+	}{%
+		02_NLSY79/output/tr_IE_vs_bls%
+	}{%
+		Transition from Inactive to Employment (IE) vs. BLS data.%
+	}{%
+		fig:tr_IE_vs_bls%
+	}{%
+		EI and IE transitions compared to BLS data with dual Y-axes.%
+	}
+	
+	% Figure Set 15: UI and IU
+	\createFigureSet{%
+		02_NLSY79/output/tr_UI_vs_bls%
+	}{%
+		Transition from Unemployment to Inactive (UI) vs. BLS data.%
+	}{%
+		fig:tr_UI_vs_bls%
+	}{%
+		02_NLSY79/output/tr_IU_vs_bls%
+	}{%
+		Transition from Inactive to Unemployment (IU) vs. BLS data.%
+	}{%
+		fig:tr_IU_vs_bls%
+	}{%
+		UI and IU transitions compared to BLS data with dual Y-axes.%
+	}
+	\subsection{Facet Graph: BLS}
+	
+	% Figure Set 7: UE and EU
+	\createFigureSet{%
+		02_NLSY79/output/tr_UE_vs_facets_bls%
+	}{%
+		Transition from Unemployment to Employment (UE).%
+	}{%
+		fig:tr_UE_vs_facets_bls%
+	}{%
+		02_NLSY79/output/tr_EU_vs_facets_bls%
+	}{%
+		Transition from Employment to Unemployment (EU).%
+	}{%
+		fig:tr_EU_vs_facets_bls%
+	}{%
+		UE and EU transitions using facet graphs according to BLS.%
+	}
+	
+	% Figure Set 8: EI and IE
+	\createFigureSet{%
+		02_NLSY79/output/tr_EI_vs_facets_bls%
+	}{%
+		Transition from Employment to Inactive (EI).%
+	}{%
+		fig:tr_EI_vs_facets_bls%
+	}{%
+		02_NLSY79/output/tr_IE_vs_facets_bls%
+	}{%
+		Transition from Inactive to Employment (IE).%
+	}{%
+		fig:tr_IE_vs_facets_bls%
+	}{%
+		EI and IE transitions using facet graphs according to BLS.%
+	}
+	
+	% Figure Set 9: UI and IU
+	\createFigureSet{%
+		02_NLSY79/output/tr_UI_vs_facets_bls%
+	}{%
+		Transition from Unemployment to Inactive (UI).%
+	}{%
+		fig:tr_UI_vs_facets_bls%
+	}{%
+		02_NLSY79/output/tr_IU_vs_facets_bls%
+	}{%
+		Transition from Inactive to Unemployment (IU).%
+	}{%
+		fig:tr_IU_vs_facets_bls%
+	}{%
+		UI and IU transitions using facet graphs according to BLS.%
+	}
+	\section{NLSY97}
+	
+	\subsection{With Two Y-Axes: Fallick and Fleischman}
+	
+	% Figure Set 1: UE and EU
+	\createFigureSet{%
+		03_NLSY97/output/Mean_Compare/tr_UE_dual_axis%
+	}{%
+		Transition from Unemployment to Employment (UE).%
+	}{%
+		fig:tr_UE_dual_axis%
+	}{%
+		03_NLSY97/output/Mean_Compare/tr_EU_dual_axis%
+	}{%
+		Transition from Employment to Unemployment (EU).%
+	}{%
+		fig:tr_EU_dual_axis%
+	}{%
+		Comparison of UE and EU transitions with dual Y-axes according to Fallick and Fleischman.%
+	}
+	
+	% Figure Set 2: EI and IE
+	\createFigureSet{%
+		03_NLSY97/output/Mean_Compare/tr_EI_dual_axis%
+	}{%
+		Transition from Employment to Inactive (EI).%
+	}{%
+		fig:tr_EI_dual_axis%
+	}{%
+		03_NLSY97/output/Mean_Compare/tr_IE_dual_axis%
+	}{%
+		Transition from Inactive to Employment (IE).%
+	}{%
+		fig:tr_IE_dual_axis%
+	}{%
+		Comparison of EI and IE transitions with dual Y-axes according to Fallick and Fleischman.%
+	}
+	
+	% Figure Set 3: UI and IU
+	\createFigureSet{%
+		03_NLSY97/output/Mean_Compare/tr_UI_dual_axis%
+	}{%
+		Transition from Unemployment to Inactive (UI).%
+	}{%
+		fig:tr_UI_dual_axis%
+	}{%
+		03_NLSY97/output/Mean_Compare/tr_IU_dual_axis%
+	}{%
+		Transition from Inactive to Unemployment (IU).%
+	}{%
+		fig:tr_IU_dual_axis%
+	}{%
+		Comparison of UI and IU transitions with dual Y-axes according to Fallick and Fleischman.%
+	}
+	
+	\subsection{Without Two Y-Axes: Fallick and Fleischman}
+	
+	% Figure Set 4: UE and EU
+	\createFigureSet{%
+		03_NLSY97/output/Mean_Compare/tr_UE_vs_Fallick_and_Fleischman%
+	}{%
+		Transition from Unemployment to Employment (UE).%
+	}{%
+		fig:tr_UE_vs_FF%
+	}{%
+		03_NLSY97/output/Mean_Compare/tr_EU_vs_Fallick_and_Fleischman%
+	}{%
+		Transition from Employment to Unemployment (EU).%
+	}{%
+		fig:tr_EU_vs_FF%
+	}{%
+		UE and EU transitions compared to Fallick and Fleischman without dual Y-axes.%
+	}
+	
+	% Figure Set 5: EI and IE
+	\createFigureSet{%
+		03_NLSY97/output/Mean_Compare/tr_EI_vs_Fallick_and_Fleischman%
+	}{%
+		Transition from Employment to Inactive (EI).%
+	}{%
+		fig:tr_EI_vs_FF%
+	}{%
+		03_NLSY97/output/Mean_Compare/tr_IE_vs_Fallick_and_Fleischman%
+	}{%
+		Transition from Inactive to Employment (IE).%
+	}{%
+		fig:tr_IE_vs_FF%
+	}{%
+		EI and IE transitions compared to Fallick and Fleischman without dual Y-axes.%
+	}
+	
+	% Figure Set 6: UI and IU
+	\createFigureSet{%
+		03_NLSY97/output/Mean_Compare/tr_UI_vs_Fallick_and_Fleischman%
+	}{%
+		Transition from Unemployment to Inactive (UI).%
+	}{%
+		fig:tr_UI_vs_FF%
+	}{%
+		03_NLSY97/output/Mean_Compare/tr_IU_vs_Fallick_and_Fleischman%
+	}{%
+		Transition from Inactive to Unemployment (IU).%
+	}{%
+		fig:tr_IU_vs_FF%
+	}{%
+		UI and IU transitions compared to Fallick and Fleischman without dual Y-axes.%
+	}
+	
+	\subsection{Facet Graph: Fallick and Fleischman}
+	
+	% Figure Set 7: UE and EU
+	\createFigureSet{%
+		03_NLSY97/output/Mean_Compare/tr_UE_facets_axis%
+	}{%
+		Transition from Unemployment to Employment (UE).%
+	}{%
+		fig:tr_UE_facets_axis%
+	}{%
+		03_NLSY97/output/Mean_Compare/tr_EU_facets_axis%
+	}{%
+		Transition from Employment to Unemployment (EU).%
+	}{%
+		fig:tr_EU_facets_axis%
+	}{%
+		UE and EU transitions using facet graphs according to Fallick and Fleischman.%
+	}
+	
+	% Figure Set 8: EI and IE
+	\createFigureSet{%
+		03_NLSY97/output/Mean_Compare/tr_EI_facets_axis%
+	}{%
+		Transition from Employment to Inactive (EI).%
+	}{%
+		fig:tr_EI_facets_axis%
+	}{%
+		03_NLSY97/output/Mean_Compare/tr_IE_facets_axis%
+	}{%
+		Transition from Inactive to Employment (IE).%
+	}{%
+		fig:tr_IE_facets_axis%
+	}{%
+		EI and IE transitions using facet graphs according to Fallick and Fleischman.%
+	}
+	
+	% Figure Set 9: UI and IU
+	\createFigureSet{%
+		03_NLSY97/output/Mean_Compare/tr_UI_facets_axis%
+	}{%
+		Transition from Unemployment to Inactive (UI).%
+	}{%
+		fig:tr_UI_facets_axis%
+	}{%
+		03_NLSY97/output/Mean_Compare/tr_IU_facets_axis%
+	}{%
+		Transition from Inactive to Unemployment (IU).%
+	}{%
+		fig:tr_IU_facets_axis%
+	}{%
+		UI and IU transitions using facet graphs according to Fallick and Fleischman.%
+	}
+	
+	\subsection{Without Two Y-Axes: BLS}
+	
+	% Figure Set 10: EU and UE
+	\createFigureSet{%
+		03_NLSY97/output/tr_EU_vs_bls_single_axis%
+	}{%
+		Transition from Employment to Unemployment (EU) vs. BLS data.%
+	}{%
+		fig:tr_EU_vs_bls_single%
+	}{%
+		03_NLSY97/output/tr_UE_vs_bls_single_axis%
+	}{%
+		Transition from Unemployment to Employment (UE) vs. BLS data.%
+	}{%
+		fig:tr_UE_vs_bls_single%
+	}{%
+		EU and UE transitions compared to BLS data without dual Y-axes.%
+	}
+	
+	% Figure Set 11: EI and IE
+	\createFigureSet{%
+		03_NLSY97/output/tr_EI_vs_bls_single_axis%
+	}{%
+		Transition from Employment to Inactive (EI) vs. BLS data.%
+	}{%
+		fig:tr_EI_vs_bls_single%
+	}{%
+		03_NLSY97/output/tr_IE_vs_bls_single_axis%
+	}{%
+		Transition from Inactive to Employment (IE) vs. BLS data.%
+	}{%
+		fig:tr_IE_vs_bls_single%
+	}{%
+		EI and IE transitions compared to BLS data without dual Y-axes.%
+	}
+	
+	% Figure Set 12: UI and IU
+	\createFigureSet{%
+		03_NLSY97/output/tr_UI_vs_bls_single_axis%
+	}{%
+		Transition from Unemployment to Inactive (UI) vs. BLS data.%
+	}{%
+		fig:tr_UI_vs_bls_single%
+	}{%
+		03_NLSY97/output/tr_IU_vs_bls_single_axis%
+	}{%
+		Transition from Inactive to Unemployment (IU) vs. BLS data.%
+	}{%
+		fig:tr_IU_vs_bls_single%
+	}{%
+		UI and IU transitions compared to BLS data without dual Y-axes.%
+	}
+	
+	\subsection{With Two Y-Axes: BLS}
+	
+	% Figure Set 13: EU and UE
+	\createFigureSet{%
+		03_NLSY97/output/tr_EU_vs_bls%
+	}{%
+		Transition from Employment to Unemployment (EU) vs. BLS data.%
+	}{%
+		fig:tr_EU_vs_bls%
+	}{%
+		03_NLSY97/output/tr_UE_vs_bls%
+	}{%
+		Transition from Unemployment to Employment (UE) vs. BLS data.%
+	}{%
+		fig:tr_UE_vs_bls%
+	}{%
+		EU and UE transitions compared to BLS data with dual Y-axes.%
+	}
+	
+	% Figure Set 14: EI and IE
+	\createFigureSet{%
+		03_NLSY97/output/tr_EI_vs_bls%
+	}{%
+		Transition from Employment to Inactive (EI) vs. BLS data.%
+	}{%
+		fig:tr_EI_vs_bls%
+	}{%
+		03_NLSY97/output/tr_IE_vs_bls%
+	}{%
+		Transition from Inactive to Employment (IE) vs. BLS data.%
+	}{%
+		fig:tr_IE_vs_bls%
+	}{%
+		EI and IE transitions compared to BLS data with dual Y-axes.%
+	}
+	
+	% Figure Set 15: UI and IU
+	\createFigureSet{%
+		03_NLSY97/output/tr_UI_vs_bls%
+	}{%
+		Transition from Unemployment to Inactive (UI) vs. BLS data.%
+	}{%
+		fig:tr_UI_vs_bls%
+	}{%
+		03_NLSY97/output/tr_IU_vs_bls%
+	}{%
+		Transition from Inactive to Unemployment (IU) vs. BLS data.%
+	}{%
+		fig:tr_IU_vs_bls%
+	}{%
+		UI and IU transitions compared to BLS data with dual Y-axes.%
+	}
+	\subsection{Facet Graph: BLS}
+	
+	% Figure Set 7: UE and EU
+	\createFigureSet{%
+		03_NLSY97/output/tr_UE_vs_facets_bls%
+	}{%
+		Transition from Unemployment to Employment (UE).%
+	}{%
+		fig:tr_UE_vs_facets_bls%
+	}{%
+		03_NLSY97/output/tr_EU_vs_facets_bls%
+	}{%
+		Transition from Employment to Unemployment (EU).%
+	}{%
+		fig:tr_EU_vs_facets_bls%
+	}{%
+		UE and EU transitions using facet graphs according to BLS.%
+	}
+	
+	% Figure Set 8: EI and IE
+	\createFigureSet{%
+		03_NLSY97/output/tr_EI_vs_facets_bls%
+	}{%
+		Transition from Employment to Inactive (EI).%
+	}{%
+		fig:tr_EI_vs_facets_bls%
+	}{%
+		03_NLSY97/output/tr_IE_vs_facets_bls%
+	}{%
+		Transition from Inactive to Employment (IE).%
+	}{%
+		fig:tr_IE_vs_facets_bls%
+	}{%
+		EI and IE transitions using facet graphs according to BLS.%
+	}
+	
+	% Figure Set 9: UI and IU
+	\createFigureSet{%
+		03_NLSY97/output/tr_UI_vs_facets_bls%
+	}{%
+		Transition from Unemployment to Inactive (UI).%
+	}{%
+		fig:tr_UI_vs_facets_bls%
+	}{%
+		03_NLSY97/output/tr_IU_vs_facets_bls%
+	}{%
+		Transition from Inactive to Unemployment (IU).%
+	}{%
+		fig:tr_IU_vs_facets_bls%
+	}{%
+		UI and IU transitions using facet graphs according to BLS.%
+	}
+\end{document}

@@ -1,0 +1,86 @@
+
+**01>LOCATION AND MOBILITY 02>Current 03>region:
+{
+		capture : rename V361 FLOCAN024_$t
+		capture : rename V876 FLOCAN024_$t
+		capture : rename V1572 FLOCAN024_$t
+		capture : rename V2284 FLOCAN024_$t
+		capture : rename V2911 FLOCAN024_$t
+		capture : rename V3279 FLOCAN024_$t
+		capture : rename V3699 FLOCAN024_$t
+		capture : rename V4178 FLOCAN024_$t
+		capture : rename V5054 FLOCAN024_$t
+		capture : rename V5633 FLOCAN024_$t
+		capture : rename V6180 FLOCAN024_$t
+		capture : rename V6773 FLOCAN024_$t
+		capture : rename V7419 FLOCAN024_$t
+		capture : rename V8071 FLOCAN024_$t
+		capture : rename V8695 FLOCAN024_$t
+		capture : rename V9381 FLOCAN024_$t
+		capture : rename V11028 FLOCAN024_$t
+		capture : rename V12379 FLOCAN024_$t
+		capture : rename V13631 FLOCAN024_$t
+		capture : rename V14678 FLOCAN024_$t
+		capture : rename V16152 FLOCAN024_$t
+		capture : rename V17538 FLOCAN024_$t
+		capture : rename V18889 FLOCAN024_$t
+		capture : rename V20189 FLOCAN024_$t
+		capture : rename V21495 FLOCAN024_$t
+		capture : rename V23327 FLOCAN024_$t
+		capture : rename ER4157E FLOCAN024_$t
+		capture : rename ER6997E FLOCAN024_$t
+		capture : rename ER9248E FLOCAN024_$t
+		capture : rename ER12221E FLOCAN024_$t
+		capture : rename ER16430 FLOCAN024_$t
+		capture : rename ER20376 FLOCAN024_$t
+		capture : rename ER24143 FLOCAN024_$t
+		capture : rename ER28042 FLOCAN024_$t
+		capture : rename ER41032 FLOCAN024_$t
+		capture : rename ER46974 FLOCAN024_$t
+		capture : rename ER52398 FLOCAN024_$t
+		capture : rename ER58215 FLOCAN024_$t
+		capture : rename ER65451 FLOCAN024_$t
+}
+
+**01>LOCATION AND MOBILITY 02>Current 03>state 04>gsa, modified:
+{
+		capture : rename V93 CurrentState_$t
+		capture : rename V537 CurrentState_$t
+		capture : rename V1103 CurrentState_$t
+		capture : rename V1803 CurrentState_$t
+		capture : rename V2403 CurrentState_$t
+		capture : rename V3003 CurrentState_$t
+		capture : rename V3403 CurrentState_$t
+		capture : rename V3803 CurrentState_$t
+		capture : rename V4303 CurrentState_$t
+		capture : rename V5203 CurrentState_$t
+		capture : rename V5703 CurrentState_$t
+		capture : rename V6303 CurrentState_$t
+		capture : rename V6903 CurrentState_$t
+		capture : rename V7503 CurrentState_$t
+		capture : rename V8203 CurrentState_$t
+		capture : rename V8803 CurrentState_$t
+		capture : rename V10003 CurrentState_$t
+		capture : rename V11103 CurrentState_$t
+		capture : rename V12503 CurrentState_$t
+		capture : rename V13703 CurrentState_$t
+		capture : rename V14803 CurrentState_$t
+		capture : rename V16303 CurrentState_$t
+		capture : rename V17703 CurrentState_$t
+		capture : rename V19003 CurrentState_$t
+		capture : rename V20303 CurrentState_$t
+		capture : rename V21603 CurrentState_$t
+		capture : rename ER4156 CurrentState_$t
+		capture : rename ER6996 CurrentState_$t
+		capture : rename ER9247 CurrentState_$t
+		capture : rename ER12221 CurrentState_$t
+		capture : rename ER13004 CurrentState_$t
+		capture : rename ER17004 CurrentState_$t
+		capture : rename ER21003 CurrentState_$t
+		capture : rename ER25003 CurrentState_$t
+		capture : rename ER36003 CurrentState_$t
+		capture : rename ER42003 CurrentState_$t
+		capture : rename ER47303 CurrentState_$t
+		capture : rename ER53003 CurrentState_$t
+		capture : rename ER60003 CurrentState_$t
+}

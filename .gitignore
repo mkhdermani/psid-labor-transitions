@@ -1,0 +1,67 @@
+# =============================================================================
+#  PSID_SHELF — files intentionally NOT published to GitHub
+# =============================================================================
+
+# --- Raw & derived microdata --------------------------------------------------
+#  PSID and NLSY are distributed under data-use agreements that prohibit public
+#  redistribution; these files also exceed GitHub's 100 MB/file limit. Only code,
+#  aggregate result graphs and write-ups are published. See README "Data availability".
+*.dta
+*.csv
+*.dat
+*.sav
+*.sas7bdat
+*.sdf
+*.cdb
+*.dct
+*.NLSCROSS
+*.NLSY79
+
+# --- Data stored in Office/Excel formats (microdata extracts) ----------------
+#  Excluded for the same reasons as .dta/.csv. NOTE: this deliberately does NOT
+#  exclude the variable-selection crosswalks under setup_framework/keyDocs/ and
+#  code/data_prep/ — those document the variable-selection work and are kept.
+**/data/**/*.xlsx
+06_Employment/employment_monthly_data.xlsx
+
+# --- Raw third-party survey extracts (NLS Investigator downloads) ------------
+02_NLSY79/extracts/
+
+# --- Archives ----------------------------------------------------------------
+*.zip
+*.gz
+*.7z
+*.rar
+
+# --- Personal application documents (kept out of the public repo) ------------
+reports/personal/
+
+# --- LaTeX build artifacts ---------------------------------------------------
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+
+# --- Python / Jupyter --------------------------------------------------------
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# --- R -----------------------------------------------------------------------
+.Rhistory
+.RData
+.Rproj.user/
+
+# --- Stata -------------------------------------------------------------------
+*.smcl
+
+# --- Editors / OS ------------------------------------------------------------
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

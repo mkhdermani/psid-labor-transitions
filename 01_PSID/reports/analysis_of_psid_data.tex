@@ -1,0 +1,108 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{pgffor} % For loops
+
+\begin{document}
+	
+	\title{Analysis of PSID data}
+	\author{Mohsen Khalili}
+	\date{\today}
+	
+	\maketitle
+	
+	% Define a list of graph filenames
+	\def\graphList{
+		weighted_avg_WLTHREALDEBFR,
+		weighted_avg_WLTHREALDEBN,
+		weighted_avg_WLTHREALDEBR,
+		weighted_avg_WLTHREALTOTFN,
+		weighted_avg_WLTHREALTOTFR,
+		weighted_avg_WLTHREALTOTN,
+		weighted_avg_WLTHREALTOTR,
+		weighted_avg_WLTHSAVETOTFN,
+		weighted_avg_WLTHSAVETOTFR,
+		weighted_avg_WLTHSAVETOTN,
+		weighted_avg_WLTHSAVETOTR,
+		weighted_avg_wealth,
+		weighted_avg_WLTHAUTOTOTFR,
+		weighted_avg_WLTHAUTOTOTN,
+		weighted_avg_WLTHAUTOTOTR,
+		weighted_avg_WLTHFBIZASSFN,
+		weighted_avg_WLTHFBIZASSFR,
+		weighted_avg_WLTHFBIZASSN,
+		weighted_avg_WLTHFBIZASSR,
+		weighted_avg_WLTHFBIZDEBFN,
+		weighted_avg_WLTHFBIZDEBFR,
+		weighted_avg_WLTHFBIZDEBN,
+		weighted_avg_WLTHFBIZDEBR,
+		weighted_avg_WLTHFBIZTOTFN,
+		weighted_avg_WLTHFBIZTOTFR,
+		weighted_avg_WLTHFBIZTOTN,
+		weighted_avg_WLTHFBIZTOTR,
+		weighted_avg_WLTHFUNDIRAFN,
+		weighted_avg_WLTHFUNDIRAN,
+		weighted_avg_WLTHFUNDIRAR,
+		weighted_avg_WLTHFUNDSTKFN,
+		weighted_avg_WLTHFUNDSTKFR,
+		weighted_avg_WLTHFUNDSTKN,
+		weighted_avg_WLTHFUNDSTKR,
+		weighted_avg_WLTHFUNDTOTFN,
+		weighted_avg_WLTHFUNDTOTFR,
+		weighted_avg_WLTHFUNDTOTN,
+		weighted_avg_WLTHFUNDTOTR,
+		weighted_avg_WLTHHOMEASSFN,
+		weighted_avg_WLTHHOMEASSFR,
+		weighted_avg_WLTHHOMEASSN,
+		weighted_avg_WLTHHOMEASSR,
+		weighted_avg_WLTHHOMEDEBFN,
+		weighted_avg_EARNINDFN,
+		weighted_avg_EARNINDFNRP,
+		weighted_avg_EARNINDFR,
+		weighted_avg_EARNINDFRRP,
+		weighted_avg_EARNINDNRP,
+		weighted_avg_EARNINDR,
+		weighted_avg_EARNINDRRP,
+		weighted_avg_EMPWORK,
+		weighted_avg_EMPWORKMM,
+		weighted_avg_EMPWORKMMRP,
+		weighted_avg_EMPWORKMMSP,
+		weighted_avg_EMPWORKRP,
+		weighted_avg_EMPWORKSP,
+		weighted_avg_TOTASS2FN,
+		weighted_avg_TOTASS2FR,
+		weighted_avg_TOTASS2N,
+		weighted_avg_TOTASS2R,
+		weighted_avg_TOTASS3FN,
+		weighted_avg_TOTASS3FR,
+		weighted_avg_TOTASS3N,
+		weighted_avg_TOTASS3R,
+		weighted_avg_TOTASSFN,
+		weighted_avg_TOTASSFR,
+		weighted_avg_TOTASSN,
+		weighted_avg_TOTASSR,
+		weighted_avg_TOTDEB2FN,
+		weighted_avg_TOTDEB2FR,
+		weighted_avg_TOTDEB2N,
+		weighted_avg_TOTDEB2R,
+		weighted_avg_TOTDEB3FN,
+		weighted_avg_TOTDEB3FR,
+		weighted_avg_TOTDEB3N,
+		weighted_avg_TOTDEB3R,
+		weighted_avg_TOTDEBFN,
+		weighted_avg_TOTDEBFR,
+		weighted_avg_TOTDEBN,
+		weighted_avg_TOTDEBR
+	}
+	
+	% Loop through each graph filename and include it
+	\foreach \graph in \graphList {
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=1\linewidth]{../Graph/\graph}
+			\caption{}
+			\label{fig:\graph}
+		\end{figure}
+	}
+	
+\end{document}

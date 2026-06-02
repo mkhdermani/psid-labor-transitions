@@ -1,0 +1,151 @@
+\documentclass{article}
+\usepackage{amsmath}  % Include the amsmath package for aligned environment
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{lipsum,afterpage}
+
+\begin{document}
+	
+	\title{Analysis of Employment Transition Rates}
+	\author{Mohsen Khalili}
+	\date{\today}
+	
+	\maketitle
+	
+	\section{Introduction}
+	This document presents a comprehensive analysis of employment transition rates based on data obtained from Stata. The dataset, sourced from PSID, spans multiple years and contains information on employment status, allowing us to examine the dynamics of transitions between employment, unemployment, and inactivity over time.
+	
+	\section{Data Preparation in Stata}
+	The Stata statistical software was utilized to preprocess and analyze the dataset. The following steps were performed:
+	
+	\section{Transition Rates Calculation}
+	The primary focus of the analysis was on calculating transition rates between various employment states. The rates were computed with the following formulas:
+	
+	\begin{enumerate}
+		\item \textbf{Employment to Unemployment Transition Rate:} The rate at which individuals transition from employment to unemployment was calculated using the formula:
+		\begin{equation}
+			\mathrm{Transition Rate} = - \ln \left(1 - \frac{\mathrm{Sum of weights for transitions from employment to unemployment}}{\mathrm{Sum of weights for lagged employment status}}\right)
+		\end{equation}
+		
+		\item \textbf{Unemployment to Employment Transition Rate:} Similarly, the rate of transitioning from unemployment to employment was computed.
+		
+		\item \textbf{Employment to Inactivity Transition Rate:} Transition rates for movements from employment to inactivity were also analyzed.
+		
+		\item \textbf{Inactivity to Employment Transition Rate:} Rates of individuals transitioning from inactivity to employment were computed.
+		
+		\item \textbf{Unemployment to Inactivity and Inactivity to Unemployment Transition Rates:} Additional rates were calculated for these transitions to provide a comprehensive understanding of the dynamics.
+	\end{enumerate}
+\newpage
+\section{NLSY79}
+Left y-axis was blue for BLS and right y-axis was red for TR.
+\newpage
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{D:/PSID_SHELF/02_NLSY79/output/tr_UE_vs_bls.png}
+	\caption{Transition Rates: NLSY79 vs. BLS}
+\end{figure}
+\newpage
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{D:/PSID_SHELF/02_NLSY79/output/tr_EU_vs_bls.png}
+	\caption{Transition Rates: NLSY79 vs. BLS}
+\end{figure}
+\newpage
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{D:/PSID_SHELF/02_NLSY79/output/tr_UI_vs_bls.png}
+	\caption{Transition Rates: NLSY79 vs. BLS}
+\end{figure}
+\newpage
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{D:/PSID_SHELF/02_NLSY79/output/tr_IU_vs_bls.png}
+	\caption{Transition Rates: NLSY79 vs. BLS}
+\end{figure}
+\newpage
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{D:/PSID_SHELF/02_NLSY79/output/tr_IE_vs_bls.png}
+	\caption{Transition Rates: NLSY79 vs. BLS}
+\end{figure}
+\newpage
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{D:/PSID_SHELF/02_NLSY79/output/tr_EI_vs_bls.png}
+	\caption{Transition Rates: NLSY79 vs. BLS}
+\end{figure}
+\newpage
+\section{NLSY97}
+Left y-axis was blue for BLS and right y-axis was red for TR.
+\newpage
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{D:/PSID_SHELF/03_NLSY97/output/tr_UE_vs_bls.png}
+	\caption{Transition Rates: NLSY97 vs. BLS}
+\end{figure}
+\newpage
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{D:/PSID_SHELF/03_NLSY97/output/tr_EU_vs_bls.png}
+	\caption{Transition Rates: NLSY97 vs. BLS}
+\end{figure}
+\newpage
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{D:/PSID_SHELF/03_NLSY97/output/tr_UI_vs_bls.png}
+	\caption{Transition Rates: NLSY97 vs. BLS}
+\end{figure}
+\newpage
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{D:/PSID_SHELF/03_NLSY97/output/tr_IU_vs_bls.png}
+	\caption{Transition Rates: NLSY97 vs. BLS}
+\end{figure}
+\newpage
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{D:/PSID_SHELF/03_NLSY97/output/tr_IE_vs_bls.png}
+	\caption{Transition Rates: NLSY97 vs. BLS}
+\end{figure}
+\newpage
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{D:/PSID_SHELF/03_NLSY97/output/tr_EI_vs_bls.png}
+	\caption{Transition Rates: NLSY97 vs. BLS}
+\end{figure}
+\newpage
+\section{PSID}
+Left y-axis was blue for BLS and right y-axis was red for TR.
+\newpage
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{D:/PSID_SHELF/06_Employment/Graph/tr_UE_vs_bls.png}
+	\caption{Transition Rates: PSID vs. BLS}
+\end{figure}
+\newpage
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{D:/PSID_SHELF/06_Employment/Graph/tr_EU_vs_bls.png}
+	\caption{Transition Rates: PSID vs. BLS}
+\end{figure}
+\newpage
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{D:/PSID_SHELF/06_Employment/Graph/tr_UI_vs_bls.png}
+	\caption{Transition Rates: PSID vs. BLS}
+\end{figure}
+\newpage
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{D:/PSID_SHELF/06_Employment/Graph/tr_IU_vs_bls.png}
+	\caption{Transition Rates: PSID vs. BLS}
+\end{figure}
+\newpage
+\begin{figure}
+	\centering
+	\includegraphics[width=1\linewidth]{D:/PSID_SHELF/06_Employment/Graph/tr_EI_vs_bls.png}
+	\caption{Transition Rates: PSID vs. BLS}
+\end{figure}
+\newpage
+\end{document}

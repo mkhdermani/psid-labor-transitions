@@ -1,0 +1,911 @@
+---
+title: Monthly Employment
+author: Mohsen
+YEAR: r Sys.YEAR()
+output:
+  html_document:
+    theme: readable    
+    highlight: kate
+    toc: true    
+    toc_depth: 4
+    toc_float: true    
+    data_print: paged
+    code_folding: hide    
+    css: styles.css
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{r setup, warning=FALSE, message=FALSE}
+# Set global options
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, cache = TRUE)
+```
+
+```{r loadlibraries, warning=FALSE, message=FALSE}
+library(haven)
+library(tidyverse)
+library(readxl)
+library(stargazer)
+library(dplyr)
+library(tidyr)
+library(tempdisagg)
+library(zoo)
+library(foreign)
+library(ggplot2)
+library(lubridate)
+library(scales)
+
+```
+
+```{r}
+df <- read_csv("D:/PSID_SHELF/02_NLSY79/data/Long_Employment_NLSY79.csv")
+
+df <- df %>%
+  group_by(CASEID) %>%  # Replace 'individual_id' with your actual ID column
+  arrange(week) %>%
+  mutate(lEMPSTATUS_ = lag(status)) %>%
+  ungroup()
+
+df$weight <- ifelse(is.na(df$weight), 0, df$weight)
+df$status <- ifelse(is.na(df$status), -1, df$status)
+df$lEMPSTATUS_ <- ifelse(is.na(df$lEMPSTATUS_), -1, df$lEMPSTATUS_)
+
+df$weight <- as.numeric(df$weight )
+df$lEMPSTATUS_ <- as.numeric(df$lEMPSTATUS_)
+
+# Sum of weights for lagged employment
+sum_weight_lag_emp <- df %>%
+  group_by(week) %>%
+  summarise(sum_weight_lag_emp = sum(weight * 
+                                     as.numeric((lEMPSTATUS_ >= 100 & lEMPSTATUS_ <= 2915) | lEMPSTATUS_ == 3 | lEMPSTATUS_ == 7),
+                                     na.rm = TRUE))
+
+# Sum of weights for lagged unemployment
+sum_weight_lag_unemp <- df %>%
+  group_by(week) %>%
+  summarise(sum_weight_lag_unemp = sum(weight * 
+                                       as.numeric(lEMPSTATUS_ == 2 | lEMPSTATUS_ == 4),
+                                       na.rm = TRUE))       
+
+# Sum of weights for lagged inactivity
+sum_weight_lag_inac <- df %>%
+  group_by(week) %>%
+  summarise(sum_weight_lag_inac = sum(weight * 
+                                      as.numeric(lEMPSTATUS_ == 5),
+                                      na.rm = TRUE)) 
+
+
+
+sum_weight_emp_to_unemp <- df %>%
+  group_by(week) %>%
+  summarise(sum_weight_emp_to_unemp = sum(weight * 
+                                          as.integer(((lEMPSTATUS_ >= 100 & lEMPSTATUS_ <= 2915) | lEMPSTATUS_ == 3 | lEMPSTATUS_ == 7) & (status == 2 | status == 4)),
+                                          na.rm = TRUE))
+
+sum_weight_unemp_to_emp <- df %>%
+  group_by(week) %>%
+  summarise(sum_weight_unemp_to_emp = sum(weight * 
+                                          as.integer((lEMPSTATUS_ == 2 | lEMPSTATUS_ == 4) & ((status >= 100 & status <= 2915) | status == 3 | status == 7)),
+                                          na.rm = TRUE))
+sum_weight_emp_to_inac <- df %>%
+    group_by(week) %>%
+    summarise(sum_weight_emp_to_inac = sum(weight * 
+                                        as.integer(((lEMPSTATUS_ >= 100 & lEMPSTATUS_ <= 2915) | lEMPSTATUS_ == 3 | lEMPSTATUS_ == 7) & (status == 5)),
+                                        na.rm = TRUE))
+sum_weight_inac_to_emp <- df %>%
+  group_by(week) %>%
+  summarise(sum_weight_inac_to_emp = sum(weight * 
+                                         as.integer((lEMPSTATUS_ == 5) & ((status >= 100 & status <= 2915) | status == 3 | status == 7)),
+                                         na.rm = TRUE))
+sum_weight_unemp_to_inac <- df %>%
+  group_by(week) %>%
+  summarise(sum_weight_unemp_to_inac = sum(weight * 
+                                           as.integer((lEMPSTATUS_ == 2 | lEMPSTATUS_ == 4) & (status == 5)),
+                                           na.rm = TRUE))
+sum_weight_inac_to_unemp <- df %>%
+  group_by(week) %>%
+  summarise(sum_weight_inac_to_unemp = sum(weight * 
+                                           as.integer((lEMPSTATUS_ == 5) & (status == 2 | status == 4)),
+                                           na.rm = TRUE))
+                                     
+sum_weight_all <- df %>%
+  group_by(week) %>%
+  summarise(sum_weight_all = sum(weight, na.rm = TRUE))
+
+TR_EMP_TO_UNEMP <- -log(1 - sum_weight_emp_to_unemp$sum_weight_emp_to_unemp / sum_weight_lag_emp$sum_weight_lag_emp)
+TR_UNEMP_TO_EMP <- -log(1 - sum_weight_unemp_to_emp$sum_weight_unemp_to_emp / sum_weight_lag_unemp$sum_weight_lag_unemp)
+TR_EMP_TO_INAC <- -log(1 - sum_weight_emp_to_inac$sum_weight_emp_to_inac / sum_weight_lag_emp$sum_weight_lag_emp)
+TR_INAC_TO_EMP <- -log(1 - sum_weight_inac_to_emp$sum_weight_inac_to_emp / sum_weight_lag_inac$sum_weight_lag_inac)
+TR_UNEMP_TO_INAC <- -log(1 - sum_weight_unemp_to_inac$sum_weight_unemp_to_inac / sum_weight_lag_unemp$sum_weight_lag_unemp)
+TR_INAC_TO_UNEMP <- -log(1 - sum_weight_inac_to_unemp$sum_weight_inac_to_unemp / sum_weight_lag_inac$sum_weight_lag_inac)
+
+TR <- data.frame(
+  week = sum_weight_emp_to_unemp$week,  # Ensure this is the correct week alignment
+  TR_EMP_TO_UNEMP,
+  TR_UNEMP_TO_EMP,
+  TR_EMP_TO_INAC,
+  TR_INAC_TO_EMP,
+  TR_UNEMP_TO_INAC,
+  TR_INAC_TO_UNEMP
+)
+
+
+
+TR <- TR[order(TR$week), ]
+TR$week <- as.numeric(as.character(TR$week))
+
+TR <- TR %>%
+  mutate(date = as.Date("1977-12-25") + weeks(week - 1)) # Subtract 1 because the week column likely starts from 1
+
+TR <- TR %>%
+  mutate(
+    year = year(date),
+    month = month(date),
+    week_of_year = week(date),
+    year_month = floor_date(as.Date(date), "month"),
+  )
+
+head(TR)
+```
+
+```{r}
+
+# List of transition rates and their labels
+transitions <- list(
+  TR_EMP_TO_UNEMP = "Employment to Unemployment",
+  TR_UNEMP_TO_EMP = "Unemployment to Employment",
+  TR_EMP_TO_INAC = "Employment to Inactivity",
+  TR_INAC_TO_EMP = "Inactivity to Employment",
+  TR_UNEMP_TO_INAC = "Unemployment to Inactivity",
+  TR_INAC_TO_UNEMP = "Inactivity to Unemployment"
+)
+
+# Loop through each transition and create plots
+for (tr in names(transitions)) {
+  plot <- ggplot(TR, aes_string(x = "year_month", y = tr)) +
+    geom_line(color = "steelblue", size = 0.5) +
+    labs(
+      x = "Date",
+      y = "Transition Rate",
+      title = paste("Transition Rate from", transitions[[tr]])
+    ) +
+    theme(
+      plot.title = element_text(face = "bold", size = 14),
+      axis.title = element_text(face = "bold", size = 12),
+      axis.text = element_text(size = 10),
+      legend.position = "none"
+    )
+  
+  # Save the plot
+  filename <- paste0("Transition_", gsub(" ", "_", transitions[[tr]]), "_Monthly.png")
+  ggsave(filename, plot = plot, width = 10, height = 6, dpi = 300, path = "D:/PSID_SHELF/02_NLSY79/output/")
+}
+
+
+mean_df <- TR %>%
+  group_by(year_month) %>%
+  summarise(
+    tr_emp_to_unemp_mean = mean(TR_EMP_TO_UNEMP),
+    tr_unemp_to_emp_mean = mean(TR_UNEMP_TO_EMP),
+    tr_emp_to_inac_mean = mean(TR_EMP_TO_INAC),
+    tr_inac_to_emp_mean = mean(TR_INAC_TO_EMP),
+    tr_unemp_to_inac_mean = mean(TR_UNEMP_TO_INAC),
+    tr_inac_to_unemp_mean = mean(TR_INAC_TO_UNEMP)
+  )
+
+# List of transition rates and their labels
+transitions <- list(
+  tr_emp_to_unemp_mean = "Employment to Unemployment",
+  tr_unemp_to_emp_mean = "Unemployment to Employment",
+  tr_emp_to_inac_mean = "Employment to Inactivity",
+  tr_inac_to_emp_mean = "Inactivity to Employment",
+  tr_unemp_to_inac_mean = "Unemployment to Inactivity",
+  tr_inac_to_unemp_mean = "Inactivity to Unemployment"
+)
+
+# Loop through each transition and create plots
+for (tr in names(transitions)) {
+  plot <- ggplot(mean_df, aes_string(x = "year_month", y = tr)) +
+    geom_line(color = "steelblue", size = 0.5) +
+    labs(
+      x = "Date",
+      y = "Transition Rate",
+      title = paste("Mean Transition Rate from", transitions[[tr]])
+    ) +
+    theme(
+      plot.title = element_text(face = "bold", size = 14),
+      axis.title = element_text(face = "bold", size = 12),
+      axis.text = element_text(size = 10),
+      legend.position = "none"
+    )
+  
+  # Save the plot
+  filename <- paste0("Transition_", gsub(" ", "_", transitions[[tr]]), "_Mean_Monthly.png")
+  ggsave(filename, plot = plot, width = 10, height = 6, dpi = 300, path = "D:/PSID_SHELF/02_NLSY79/output/")
+}
+
+```
+
+```{r}
+
+BLS <- read_dta("D:/PSID_SHELF/04_CPS/CPS-BLS/compare_psid/panel_cps.dta")
+
+BLS$YEAR <- dmy(paste0("01-", BLS$YEAR))
+
+cutoff_date <- ymd("1977-01-01")
+
+
+BLS <- BLS[BLS$YEAR >= cutoff_date, ]
+
+mean_df <- mean_df %>%
+  rename(
+    YEAR = year_month
+  )
+
+combined_df <- BLS %>%
+  select(YEAR, tr_EU, tr_UE, tr_IE, tr_EI, tr_IU, tr_UI) %>%
+  rename(
+    BLS_EU_Transition_Rate = tr_EU,
+    BLS_UE_Transition_Rate = tr_UE,
+    BLS_IE_Transition_Rate = tr_IE,
+    BLS_EI_Transition_Rate = tr_EI,
+    BLS_IU_Transition_Rate = tr_IU,
+    BLS_UI_Transition_Rate = tr_UI
+  ) %>%
+  full_join(
+    mean_df %>%
+      select(YEAR, tr_emp_to_unemp_mean) %>%
+      rename(TR_EU_Transition_Rate = tr_emp_to_unemp_mean),
+    by = "YEAR"
+  ) %>%
+  full_join(
+    mean_df %>%
+      select(YEAR, tr_unemp_to_emp_mean) %>%
+      rename(TR_UE_Transition_Rate = tr_unemp_to_emp_mean),
+    by = "YEAR"
+  ) %>%
+  full_join(
+    mean_df %>%
+      select(YEAR, tr_emp_to_inac_mean) %>%
+      rename(TR_EI_Transition_Rate = tr_emp_to_inac_mean),
+    by = "YEAR"
+  ) %>%
+  full_join(
+    mean_df %>%
+      select(YEAR, tr_inac_to_emp_mean) %>%
+      rename(TR_IE_Transition_Rate = tr_inac_to_emp_mean),
+    by = "YEAR"
+  ) %>%
+  full_join(
+    mean_df %>%
+      select(YEAR, tr_unemp_to_inac_mean) %>%
+      rename(TR_UI_Transition_Rate = tr_unemp_to_inac_mean),
+    by = "YEAR"
+  ) %>%
+  full_join(
+    mean_df %>%
+      select(YEAR, tr_inac_to_unemp_mean) %>%
+      rename(TR_IU_Transition_Rate = tr_inac_to_unemp_mean),
+    by = "YEAR"
+  )
+print(head(combined_df$TR_UI_Transition_Rate  ))
+
+```
+
+```{r}
+
+plot_and_save <- function(df, bls_col, tr_col, title, file_path, secondary_y_axis = TRUE) {
+  
+  df_clean <- df %>%
+    filter(!is.na(.data[[bls_col]]) & !is.na(.data[[tr_col]]))
+  
+  max_bls <- max(df_clean[[bls_col]], na.rm = TRUE)
+  min_bls <- min(df_clean[[bls_col]], na.rm = TRUE)
+  max_tr <- max(df_clean[[tr_col]], na.rm = TRUE)
+  min_tr <- min(df_clean[[tr_col]], na.rm = TRUE)
+  
+  scale_factor <- (max_bls - min_bls) / (max_tr - min_tr)
+  shift <- min_bls - (min_tr * scale_factor)
+ 
+  inv_transform <- function(x) (x - shift) / scale_factor
+
+  p <- ggplot(df_clean, aes(x = YEAR)) +
+    geom_line(aes(y = .data[[bls_col]], color = "BLS"), size = 1.2) +
+    geom_line(aes(y = (.data[[tr_col]] * scale_factor) + shift, color = "NLSY79"), size = 1.2) +
+    labs(x = "Year", y = "Transition Rate", title = title) +
+    scale_color_manual(name = "Dataset", values = c("BLS" = "blue", "NLSY79" = "red")) +
+    theme(
+      plot.title = element_text(face = "bold", size = 14),
+      axis.title.y.left = element_text(color = "blue"),
+      axis.title.y.right = element_text(color = "red"),
+      axis.text.y.left = element_text(color = "blue"),
+      axis.text.y.right = element_text(color = "red"),
+      legend.position = "bottom"
+    )
+  
+  if (secondary_y_axis) {
+    p <- p + scale_y_continuous(
+      name = "BLS Transition Rate",
+      sec.axis = sec_axis(~ inv_transform(.),name = "TR Transition Rate")  # Corrected formula for consistency
+    )
+  } else {
+    p <- p + scale_y_continuous(name = "BLS Transition Rate")
+  }
+  
+  ggsave(file_path, plot = p, width = 10, height = 6, dpi = 300)
+}
+
+transitions <- list(
+  list(bls_col = "BLS_EU_Transition_Rate", tr_col = "TR_EU_Transition_Rate", title = "Comparison: Employment to Unemployment Transition Rate", filename = "tr_EU_vs_bls.png"),
+  list(bls_col = "BLS_UE_Transition_Rate", tr_col = "TR_UE_Transition_Rate", title = "Comparison: Unemployment to Employment Transition Rate", filename = "tr_UE_vs_bls.png"),
+  list(bls_col = "BLS_EI_Transition_Rate", tr_col = "TR_EI_Transition_Rate", title = "Comparison: Employment to Inactivity Transition Rate", filename = "tr_EI_vs_bls.png"),
+  list(bls_col = "BLS_IE_Transition_Rate", tr_col = "TR_IE_Transition_Rate", title = "Comparison: Inactivity to Employment Transition Rate", filename = "tr_IE_vs_bls.png"),
+  list(bls_col = "BLS_UI_Transition_Rate", tr_col = "TR_UI_Transition_Rate", title = "Comparison: Unemployment to Inactivity Transition Rate", filename = "tr_UI_vs_bls.png"),
+  list(bls_col = "BLS_IU_Transition_Rate", tr_col = "TR_IU_Transition_Rate", title = "Comparison: Inactivity to Unemployment Transition Rate", filename = "tr_IU_vs_bls.png")
+)
+
+# Loop through transitions and plot
+for (t in transitions) {
+  plot_and_save(
+    df = combined_df,
+    bls_col = t$bls_col,
+    tr_col = t$tr_col,
+    title = t$title,
+    file_path = paste0("D:/PSID_SHELF/02_NLSY79/output/", t$filename),
+    secondary_y_axis = TRUE
+  )
+}
+
+
+############################################
+
+transitions <- list(
+  list(bls_col = "BLS_EU_Transition_Rate", tr_col = "TR_EU_Transition_Rate", title = "Comparison: Employment to Unemployment Transition Rate", filename = "tr_EU_vs_bls"),
+  list(bls_col = "BLS_UE_Transition_Rate", tr_col = "TR_UE_Transition_Rate", title = "Comparison: Unemployment to Employment Transition Rate", filename = "tr_UE_vs_bls"),
+  list(bls_col = "BLS_EI_Transition_Rate", tr_col = "TR_EI_Transition_Rate", title = "Comparison: Employment to Inactivity Transition Rate", filename = "tr_EI_vs_bls"),
+  list(bls_col = "BLS_IE_Transition_Rate", tr_col = "TR_IE_Transition_Rate", title = "Comparison: Inactivity to Employment Transition Rate", filename = "tr_IE_vs_bls"),
+  list(bls_col = "BLS_UI_Transition_Rate", tr_col = "TR_UI_Transition_Rate", title = "Comparison: Unemployment to Inactivity Transition Rate", filename = "tr_UI_vs_bls"),
+  list(bls_col = "BLS_IU_Transition_Rate", tr_col = "TR_IU_Transition_Rate", title = "Comparison: Inactivity to Unemployment Transition Rate", filename = "tr_IU_vs_bls")
+)
+
+plot_and_save <- function(df, bls_col, tr_col, title, file_path) {
+  
+  p <- ggplot(df, aes(x = YEAR)) +
+    geom_line(aes(y = .data[[bls_col]], color = "BLS"), size = 1.2) +
+    geom_line(aes(y = .data[[tr_col]], color = "NLSY79"), size = 1.2) + 
+    labs(x = "Year", y = "Transition Rate", title = title) +
+    scale_color_manual(name = "Dataset", values = c("BLS" = "blue", "NLSY79" = "red")) + 
+    theme(
+      plot.title = element_text(face = "bold", size = 14),
+      axis.title.y = element_text(color = "black"), 
+      axis.text.y = element_text(color = "black"), 
+      legend.position = "bottom"
+    )
+
+  ggsave(filename = paste0(file_path, ".png"), plot = p, width = 8, height = 6, dpi = 300)
+}
+
+for (t in transitions) {
+  plot_and_save(
+    df = combined_df,
+    bls_col = t$bls_col,
+    tr_col = t$tr_col,
+    title = t$title,
+    file_path = paste0("D:/PSID_SHELF/02_NLSY79/output/", t$filename, "_single_axis")
+  )
+}
+
+##########################################
+
+# Function to plot comparisons using facets
+plot_comparison_facets <- function(df, primary_col, secondary_col, title, file_path) {
+  # Ensure specified columns exist in the data frame
+  if (!(primary_col %in% names(df)) || !(secondary_col %in% names(df))) {
+    stop("One or both specified columns do not exist in the data frame.")
+  }
+  
+  # Prepare data for faceting by transforming to long format
+  df_long <- df %>%
+    select(YEAR, BLS = .data[[primary_col]], NLSY79 = .data[[secondary_col]]) %>%
+    pivot_longer(cols = c("BLS", "NLSY79"), names_to = "Dataset", values_to = "Transition_Rate")
+  
+  # Filter out rows with missing transition rate values
+  df_long <- df_long %>% filter(!is.na(Transition_Rate))
+  
+  # Abort if no data is available for plotting
+  if (nrow(df_long) == 0) {
+    stop("No data available after filtering out missing values.")
+  }
+  
+  # Create the plot with ggplot2
+  p <- ggplot(df_long, aes(x = YEAR, y = Transition_Rate, color = Dataset)) +
+    geom_line(size = 1.2) +
+    labs(x = "Year", y = "Transition Rate", title = title) +
+    facet_wrap(~ Dataset, scales = "free_y") +
+    scale_color_manual(name = "Dataset", values = c("BLS" = "blue", "NLSY79" = "red")) +
+     theme(
+      plot.title = element_text(face = "bold", size = 14),
+      axis.title.x = element_text(color = "black"),  
+      axis.title.y = element_text(color = "black"),  
+      legend.position = "bottom"
+    )
+  
+  # Save the plot to the specified file path
+  ggsave(file_path, plot = p, width = 12, height = 6, dpi = 300)
+}
+
+# Define a list of transition rates for comparison
+transitions <- list(
+  list(bls_col = "BLS_EU_Transition_Rate", tr_col = "TR_EU_Transition_Rate", title = "Comparison: Employment to Unemployment Transition Rate", filename = "tr_EU_vs_facets_bls.png"),
+  list(bls_col = "BLS_UE_Transition_Rate", tr_col = "TR_UE_Transition_Rate", title = "Comparison: Unemployment to Employment Transition Rate", filename = "tr_UE_vs_facets_bls.png"),
+  list(bls_col = "BLS_EI_Transition_Rate", tr_col = "TR_EI_Transition_Rate", title = "Comparison: Employment to Inactivity Transition Rate", filename = "tr_EI_vs_facets_bls.png"),
+  list(bls_col = "BLS_IE_Transition_Rate", tr_col = "TR_IE_Transition_Rate", title = "Comparison: Inactivity to Employment Transition Rate", filename = "tr_IE_vs_facets_bls.png"),
+  list(bls_col = "BLS_UI_Transition_Rate", tr_col = "TR_UI_Transition_Rate", title = "Comparison: Unemployment to Inactivity Transition Rate", filename = "tr_UI_vs_facets_bls.png"),
+  list(bls_col = "BLS_IU_Transition_Rate", tr_col = "TR_IU_Transition_Rate", title = "Comparison: Inactivity to Unemployment Transition Rate", filename = "tr_IU_vs_facets_bls.png")
+)
+
+# Loop over each transition type for plotting
+for (tr in transitions) {
+  plot_comparison_facets(
+    combined_df, # Ensure this DataFrame is defined in your R environment
+    primary_col = tr$bls_col,
+    secondary_col = tr$tr_col,
+    title = tr$title,
+    file_path = paste0("D:/PSID_SHELF/02_NLSY79/output/", tr$filename)
+  )
+}
+```
+
+```{r}
+mean(combined_df$BLS_EU_Transition_Rate, na.rm = TRUE)
+mean(combined_df$BLS_UE_Transition_Rate, na.rm = TRUE)
+mean(combined_df$BLS_EI_Transition_Rate, na.rm = TRUE)
+mean(combined_df$BLS_IE_Transition_Rate, na.rm = TRUE)
+mean(combined_df$BLS_UI_Transition_Rate, na.rm = TRUE)
+mean(combined_df$BLS_IU_Transition_Rate, na.rm = TRUE)
+```
+
+```{r}
+
+mean(combined_df$TR_EU_Transition_Rate, na.rm = TRUE)
+mean(combined_df$TR_UE_Transition_Rate, na.rm = TRUE)
+mean(combined_df$TR_EI_Transition_Rate, na.rm = TRUE)
+mean(combined_df$TR_IE_Transition_Rate, na.rm = TRUE)
+mean(combined_df$TR_UI_Transition_Rate, na.rm = TRUE)
+mean(combined_df$TR_IU_Transition_Rate, na.rm = TRUE)
+```
+
+```{r}
+
+write.csv(mean_df, "D:/PSID_SHELF/02_NLSY79/data/NLSY79_MEAN.csv", row.names = FALSE)
+
+```
+
+
+```{r calculate_transition_rates}
+      
+TR <- data.frame(
+  week = sum_weight_emp_to_unemp$week,  # Ensure this is the correct week alignment
+  sum_weight_emp_to_unemp,
+  sum_weight_unemp_to_emp,
+  sum_weight_emp_to_inac,
+  sum_weight_inac_to_emp,
+  sum_weight_unemp_to_inac,
+  sum_weight_inac_to_unemp,
+  sum_weight_all
+)
+
+
+
+TR <- TR[order(TR$week), ]
+TR$week <- as.numeric(as.character(TR$week))
+
+
+
+library(lubridate)
+library(dplyr)
+
+TR <- TR %>%
+  mutate(date = as.Date("1977-12-25") + weeks(week - 1)) # Subtract 1 because the week column likely starts from 1
+
+TR <- TR %>%
+  mutate(
+    year = year(date),
+    month = month(date),
+    week_of_year = week(date),
+    year_month = floor_date(as.Date(date), "month"),
+  )
+
+head(TR)
+
+
+mean_df <- TR %>%
+  group_by(year_month) %>%
+  summarise(
+    tr_emp_to_unemp_mean = mean(sum_weight_emp_to_unemp, na.rm = TRUE),
+    tr_unemp_to_emp_mean = mean(sum_weight_unemp_to_emp, na.rm = TRUE),
+    tr_emp_to_inac_mean = mean(sum_weight_emp_to_inac, na.rm = TRUE),
+    tr_inac_to_emp_mean = mean(sum_weight_inac_to_emp, na.rm = TRUE),
+    tr_unemp_to_inac_mean = mean(sum_weight_unemp_to_inac, na.rm = TRUE),
+    tr_inac_to_unemp_mean = mean(sum_weight_inac_to_unemp, na.rm = TRUE),
+    tr_sum_weight_all_mean = mean(sum_weight_all, na.rm = TRUE)  # Ensure 'sum_weight_all' is a column
+  )
+
+
+mean_df <-  mean_df %>%
+  rename(
+    YEAR = year_month
+  )
+      
+TR <-  TR %>%
+  rename(
+    YEAR = year_month
+  )
+
+mean_df <- mean_df %>%
+  mutate(
+    year = year(YEAR),
+    month = month(YEAR)
+  )
+
+# Compute transition rates
+TR <- mean_df %>%
+  group_by(year, month) %>%
+  mutate(
+    TR_EMP_TO_UNEMP = (tr_emp_to_unemp_mean / tr_sum_weight_all_mean) ,
+    TR_UNEMP_TO_EMP = (tr_unemp_to_emp_mean / tr_sum_weight_all_mean) ,
+    TR_EMP_TO_INAC = (tr_emp_to_inac_mean / tr_sum_weight_all_mean) ,
+    TR_INAC_TO_EMP = (tr_inac_to_emp_mean/ tr_sum_weight_all_mean) ,
+    TR_UNEMP_TO_INAC = (tr_unemp_to_inac_mean / tr_sum_weight_all_mean) ,
+    TR_INAC_TO_UNEMP = (tr_inac_to_unemp_mean/ tr_sum_weight_all_mean) 
+  ) %>%
+  arrange(YEAR)
+
+
+TR_mean <- data.frame(lapply(TR, function(x) {
+  if(is.character(x) | is.factor(x)) as.numeric(as.character(x)) else x
+}))
+
+# Compute column means, excluding non-numeric columns (like year and month)
+numeric_columns <- TR_mean[, sapply(TR_mean, is.numeric)]
+column_means <- colMeans(numeric_columns)
+print(column_means)
+```
+
+
+```{r plot_transition_rates}
+# Function to plot transition rates
+plot_transition_rates <- function(df, transition_col, title) {
+  ggplot(df, aes(x = YEAR, y = !!sym(transition_col))) +
+    geom_line(color = "steelblue", size = 1.5) +
+    labs(x = "Year", y = "Transition Rate", title = title) +
+    theme(plot.title = element_text(face = "bold", size = 14),
+          axis.title = element_text(face = "bold", size = 12),
+          axis.text = element_text(size = 10),
+          legend.position = "none")
+}
+
+# Plot and save Employment to Unemployment Transition Rate
+p_emp_to_unemp <- plot_transition_rates(TR %>% filter(!is.na(TR_EMP_TO_UNEMP)), "TR_EMP_TO_UNEMP", "Transition Rate from Employment to Unemployment")
+ggsave("D:/PSID_SHELF/02_NLSY79/output/Mean_Compare/Transition_Employment_to_Unemployment.png", p_emp_to_unemp, width = 10, height = 6, dpi = 300)
+
+# Plot and save Unemployment to Employment Transition Rate
+p_unemp_to_emp <- plot_transition_rates(TR %>% filter(!is.na(TR_UNEMP_TO_EMP)), "TR_UNEMP_TO_EMP", "Transition Rate from Unemployment to Employment")
+ggsave("D:/PSID_SHELF/02_NLSY79/output/Mean_Compare/Transition_Unemployment_to_Employment.png", p_unemp_to_emp, width = 10, height = 6, dpi = 300)
+
+# Plot and save Employment to Inactivity Transition Rate
+p_emp_to_inac <- plot_transition_rates(TR %>% filter(!is.na(TR_EMP_TO_INAC)), "TR_EMP_TO_INAC", "Transition Rate from Employment to Inactivity")
+ggsave("D:/PSID_SHELF/02_NLSY79/output/Mean_Compare/Transition_Employment_to_Inactivity.png", p_emp_to_inac, width = 10, height = 6, dpi = 300)
+
+# Plot and save Inactivity to Employment Transition Rate
+p_inac_to_emp <- plot_transition_rates(TR %>% filter(!is.na(TR_INAC_TO_EMP)), "TR_INAC_TO_EMP", "
+
+Transition Rate from Inactivity to Employment")
+ggsave("D:/PSID_SHELF/02_NLSY79/output/Mean_Compare/Transition_Inactivity_to_Employment.png", p_inac_to_emp, width = 10, height = 6, dpi = 300)
+
+# Plot and save Unemployment to Inactivity Transition Rate
+p_unemp_to_inac <- plot_transition_rates(TR %>% filter(!is.na(TR_UNEMP_TO_INAC)), "TR_UNEMP_TO_INAC", "Transition Rate from Unemployment to Inactivity")
+ggsave("D:/PSID_SHELF/02_NLSY79/output/Mean_Compare/Transition_Unemployment_to_Inactivity.png", p_unemp_to_inac, width = 10, height = 6, dpi = 300)
+
+# Plot and save Inactivity to Unemployment Transition Rate
+p_inac_to_unemp <- plot_transition_rates(TR %>% filter(!is.na(TR_INAC_TO_UNEMP)), "TR_INAC_TO_UNEMP", "Transition Rate from Inactivity to Unemployment")
+ggsave("D:/PSID_SHELF/02_NLSY79/output/Mean_Compare/Transition_Inactivity_to_Unemployment.png", p_inac_to_unemp, width = 10, height = 6, dpi = 300)
+```
+
+```{r load_and_process_Fallick_and_Fleischman_data}
+# Load Fallick_and_Fleischman data
+Fallick_and_Fleischman <- read_excel("D:/PSID_SHELF/06_Employment/fallick_and_fleischman.xlsx")
+Fallick_and_Fleischman <- Fallick_and_Fleischman %>%
+  rename(YEAR = `Year:Mnth`) %>%
+  mutate(YEAR = parse_date_time(YEAR, "ym")) %>%
+  mutate(across(where(is.character), ~ as.numeric(as.character(.)))) %>%
+  mutate(across(c(EUpop, UEpop, NEpop, ENpop, NUpop, UNpop), ~ . / 100))
+```
+
+```{r combine_datasets}
+# Combine transition rates with Fallick_and_Fleischman data
+combined_df <- Fallick_and_Fleischman %>%
+  select(YEAR, EUpop, UEpop, NEpop, ENpop, NUpop, UNpop) %>%
+  rename(
+    Fallick_and_Fleischman_EU_Transition_Rate = EUpop,
+    Fallick_and_Fleischman_UE_Transition_Rate = UEpop,
+    Fallick_and_Fleischman_IE_Transition_Rate = NEpop,
+    Fallick_and_Fleischman_EI_Transition_Rate = ENpop,
+    Fallick_and_Fleischman_IU_Transition_Rate = NUpop,
+    Fallick_and_Fleischman_UI_Transition_Rate = UNpop
+  ) %>%
+  full_join(
+    TR %>%
+      select(YEAR, TR_EMP_TO_UNEMP) %>%
+      rename(TR_EU_Transition_Rate = TR_EMP_TO_UNEMP),
+    by = "YEAR"
+  ) %>%
+  full_join(
+    TR %>%
+      select(YEAR, TR_UNEMP_TO_EMP) %>%
+      rename(TR_UE_Transition_Rate = TR_UNEMP_TO_EMP),
+    by = "YEAR"
+  ) %>%
+  full_join(
+    TR %>%
+      select(YEAR, TR_EMP_TO_INAC) %>%
+      rename(TR_EI_Transition_Rate = TR_EMP_TO_INAC),
+    by = "YEAR"
+  ) %>%
+  full_join(
+    TR %>%
+      select(YEAR, TR_INAC_TO_EMP) %>%
+      rename(TR_IE_Transition_Rate = TR_INAC_TO_EMP),
+    by = "YEAR"
+  ) %>%
+  full_join(
+    TR %>%
+      select(YEAR, TR_UNEMP_TO_INAC) %>%
+      rename(TR_UI_Transition_Rate = TR_UNEMP_TO_INAC),
+    by = "YEAR"
+  ) %>%
+  full_join(
+    TR %>%
+      select(YEAR, TR_INAC_TO_UNEMP) %>%
+      rename(TR_IU_Transition_Rate = TR_INAC_TO_UNEMP),
+    by = "YEAR"
+  )
+```
+
+```{r plot_comparison}
+# Function to plot and save comparisons
+plot_and_save <- function(df, Fallick_and_Fleischman_col, tr_col, title, file_path) {
+  # Check if columns exist in the data frame
+  if (!(Fallick_and_Fleischman_col %in% names(df)) || !(tr_col %in% names(df))) {
+    stop("One or both specified columns do not exist in the data frame.")
+  }
+
+  # Remove rows with missing values in the specified columns
+  df_clean <- df %>%
+    filter(!is.na(.data[[Fallick_and_Fleischman_col]]) & !is.na(.data[[tr_col]]))
+  
+  # Check if the data frame is empty after filtering
+  if (nrow(df_clean) == 0) {
+    stop("No data available after filtering out missing values.")
+  }
+  
+  # Create the plot
+  p <- ggplot(df_clean, aes(x = YEAR)) +
+    geom_line(aes(y = .data[[Fallick_and_Fleischman_col]], color = "Fallick and Fleischman"), size = 1.2) +
+    geom_line(aes(y = .data[[tr_col]], color = "NLSY79"), size = 1.2) +
+    labs(x = "Year", y = "Transition Rate", title = title) +
+    scale_color_manual(name = "Dataset", values = c("Fallick and Fleischman" = "blue", "NLSY79" = "red")) +
+    theme(
+      plot.title = element_text(face = "bold", size = 14),
+      axis.title.y = element_text(color = "black"), 
+      axis.text.y = element_text(color = "black"), 
+      legend.position = "bottom"
+    )
+  
+  # Save the plot
+  ggsave(file_path, plot = p, width = 10, height = 6, dpi = 300)
+}
+
+# Plot comparisons
+plot_and_save(
+  combined_df, "Fallick_and_Fleischman_EU_Transition_Rate", "TR_EU_Transition_Rate",
+  "Comparison: Employment to Unemployment Transition Rate",
+  "D:/PSID_SHELF/02_NLSY79/output/Mean_Compare/tr_EU_vs_Fallick_and_Fleischman.png"
+)
+
+plot_and_save(
+  combined_df, "Fallick_and_Fleischman_UE_Transition_Rate", "TR_UE_Transition_Rate",
+  "Comparison: Unemployment to Employment Transition Rate",
+  "D:/PSID_SHELF/02_NLSY79/output/Mean_Compare/tr_UE_vs_Fallick_and_Fleischman.png"
+)
+
+plot_and_save(
+  combined_df, "Fallick_and_Fleischman_EI_Transition_Rate", "TR_EI_Transition_Rate",
+  "Comparison: Employment to Inactivity Transition Rate",
+  "D:/PSID_SHELF/02_NLSY79/output/Mean_Compare/tr_EI_vs_Fallick_and_Fleischman.png"
+)
+
+plot_and_save(
+  combined_df, "Fallick_and_Fleischman_IE_Transition_Rate", "TR_IE_Transition_Rate",
+  "Comparison: Inactivity to Employment Transition Rate",
+  "D:/PSID_SHELF/02_NLSY79/output/Mean_Compare/tr_IE_vs_Fallick_and_Fleischman.png"
+)
+
+plot_and_save(
+  combined_df, "Fallick_and_Fleischman_UI_Transition_Rate", "TR_UI_Transition_Rate",
+  "Comparison: Unemployment to Inactivity Transition Rate",
+  "D:/PSID_SHELF/02_NLSY79/output/Mean_Compare/tr_UI_vs_Fallick_and_Fleischman.png"
+)
+
+plot_and_save(
+  combined_df, "Fallick_and_Fleischman_IU_Transition_Rate", "TR_IU_Transition_Rate",
+  "Comparison: Inactivity to Unemployment Transition Rate",
+  "D:/PSID_SHELF/02_NLSY79/output/Mean_Compare/tr_IU_vs_Fallick_and_Fleischman.png"
+)
+```
+
+```{r plot_comparison}
+
+# Function to plot and compare with dual y-axes (use with caution)
+plot_dual_axis <- function(df, secondary_col, primary_col, title, file_path) {
+  # Ensure columns exist
+  if (!(primary_col %in% names(df))) {
+    stop(paste0("Primary column '", primary_col, "' does not exist in the data frame."))
+  }
+  
+  if (!(secondary_col %in% names(df))) {
+    stop(paste0("Secondary column '", secondary_col, "' does not exist in the data frame."))
+  }
+  
+  # Include rows where either column has data
+  df_clean <- df %>%
+    filter(!is.na(.data[[primary_col]]) | !is.na(.data[[secondary_col]]))
+  
+  # Check if the cleaned data frame is empty after filtering
+  if (nrow(df_clean) == 0) {
+    stop("No data available after filtering out missing values.")
+  }
+  
+  # Calculate scaling and shifting factors for the secondary axis
+  max_primary <- max(df_clean[[primary_col]], na.rm = TRUE)
+  min_primary <- min(df_clean[[primary_col]], na.rm = TRUE)
+  max_secondary <- max(df_clean[[secondary_col]], na.rm = TRUE)
+  min_secondary <- min(df_clean[[secondary_col]], na.rm = TRUE)
+  
+  scale_factor <- (max_primary - min_primary) / (max_secondary - min_secondary)
+  shift <- min_primary - min_secondary * scale_factor
+  
+  # Create inverse transformation function for secondary axis
+  inv_transform <- function(x) (x - shift) / scale_factor
+  
+  # Create the plot using ggplot
+  p <- ggplot(df_clean, aes(x = YEAR)) +
+    geom_line(aes(y = .data[[primary_col]], color = "Fallick and Fleischman"), size = 1.2, na.rm = TRUE) +
+    geom_line(aes(y = .data[[secondary_col]] * scale_factor + shift, color = "NLSY79"), size = 1.2, na.rm = TRUE) +
+    scale_y_continuous(
+      name = "Fallick and Fleischman Transition Rate",
+      sec.axis = sec_axis(~ inv_transform(.), name = "NLSY79 Transition Rate")
+    ) +
+    labs(x = "Year", title = title) +
+    scale_color_manual(name = "Dataset", values = c("Fallick and Fleischman" = "blue", "NLSY79" = "red")) +
+    theme(
+      plot.title = element_text(face = "bold", size = 14),
+      axis.title.y.left = element_text(color = "blue"),
+      axis.title.y.right = element_text(color = "red"),
+      axis.text.y.left = element_text(color = "blue"),
+      axis.text.y.right = element_text(color = "red"),
+      legend.position = "bottom"
+    )
+  
+  # Save the plot to the specified file path
+  ggsave(file_path, plot = p, width = 10, height = 6, dpi = 300)
+}
+
+# Define a list of transition rates to compare
+transition_rates <- list(
+  list(primary = "TR_EU_Transition_Rate", secondary = "Fallick_and_Fleischman_EU_Transition_Rate", title = "Comparison: Employment to Unemployment Transition Rate", file = "tr_EU_dual_axis.png"),
+  list(primary = "TR_UE_Transition_Rate", secondary = "Fallick_and_Fleischman_UE_Transition_Rate", title = "Comparison: Unemployment to Employment Transition Rate", file = "tr_UE_dual_axis.png"),
+  list(primary = "TR_EI_Transition_Rate", secondary = "Fallick_and_Fleischman_EI_Transition_Rate", title = "Comparison: Employment to Inactivity Transition Rate", file = "tr_EI_dual_axis.png"),
+  list(primary = "TR_IE_Transition_Rate", secondary = "Fallick_and_Fleischman_IE_Transition_Rate", title = "Comparison: Inactivity to Employment Transition Rate", file = "tr_IE_dual_axis.png"),
+  list(primary = "TR_UI_Transition_Rate", secondary = "Fallick_and_Fleischman_UI_Transition_Rate", title = "Comparison: Unemployment to Inactivity Transition Rate", file = "tr_UI_dual_axis.png"),
+  list(primary = "TR_IU_Transition_Rate", secondary = "Fallick_and_Fleischman_IU_Transition_Rate", title = "Comparison: Inactivity to Unemployment Transition Rate", file = "tr_IU_dual_axis.png")
+)
+
+# Loop through the transition rates and generate the plots
+for (tr in transition_rates) {
+  plot_dual_axis(
+    combined_df,
+    tr$primary,
+    tr$secondary,
+    tr$title,
+    paste0("D:/PSID_SHELF/02_NLSY79/output/Mean_Compare/", tr$file)
+  )
+}
+
+```
+
+```{r}
+
+# Function to plot comparisons using facets
+plot_comparison_facets <- function(df, primary_col, secondary_col, title, file_path) {
+  # Ensure specified columns exist in the data frame
+  if (!(primary_col %in% names(df)) || !(secondary_col %in% names(df))) {
+    stop("One or both specified columns do not exist in the data frame.")
+  }
+  
+  # Prepare data for faceting by transforming to long format
+  df_long <- df %>%
+    select(YEAR, Fallick_and_Fleischman = .data[[secondary_col]], NLSY79 = .data[[primary_col]]) %>%
+    pivot_longer(cols = c("Fallick_and_Fleischman", "NLSY79"), names_to = "Dataset", values_to = "Transition_Rate")
+  
+  # Filter out rows with missing transition rate values
+  df_long <- df_long %>% filter(!is.na(Transition_Rate))
+  
+  # Abort if no data is available for plotting
+  if (nrow(df_long) == 0) {
+    stop("No data available after filtering out missing values.")
+  }
+  
+  # Create the plot with ggplot2
+  p <- ggplot(df_long, aes(x = YEAR, y = Transition_Rate, color = Dataset)) +
+    geom_line(size = 1.2) +
+    labs(x = "Year", y = "Transition Rate", title = title) +
+    facet_wrap(~ Dataset, scales = "free_y") +
+    scale_color_manual(name = "Dataset", values = c("Fallick_and_Fleischman" = "blue", "NLSY79" = "red")) +
+     theme(
+      plot.title = element_text(face = "bold", size = 14),
+      axis.title.x = element_text(color = "black"),  
+      axis.title.y = element_text(color = "black"),  
+      legend.position = "bottom"
+    )
+  
+  # Save the plot to the specified file path
+  ggsave(file_path, plot = p, width = 12, height = 6, dpi = 300)
+}
+
+
+# Define a list of transition rates to compare
+transition_rates <- list(
+  list(primary = "TR_EU_Transition_Rate", secondary = "Fallick_and_Fleischman_EU_Transition_Rate", title = "Comparison: Employment to Unemployment Transition Rate", file = "tr_EU_facets_axis.png"),
+  list(primary = "TR_UE_Transition_Rate", secondary = "Fallick_and_Fleischman_UE_Transition_Rate", title = "Comparison: Unemployment to Employment Transition Rate", file = "tr_UE_facets_axis.png"),
+  list(primary = "TR_EI_Transition_Rate", secondary = "Fallick_and_Fleischman_EI_Transition_Rate", title = "Comparison: Employment to Inactivity Transition Rate", file = "tr_EI_facets_axis.png"),
+  list(primary = "TR_IE_Transition_Rate", secondary = "Fallick_and_Fleischman_IE_Transition_Rate", title = "Comparison: Inactivity to Employment Transition Rate", file = "tr_IE_facets_axis.png"),
+  list(primary = "TR_UI_Transition_Rate", secondary = "Fallick_and_Fleischman_UI_Transition_Rate", title = "Comparison: Unemployment to Inactivity Transition Rate", file = "tr_UI_facets_axis.png"),
+  list(primary = "TR_IU_Transition_Rate", secondary = "Fallick_and_Fleischman_IU_Transition_Rate", title = "Comparison: Inactivity to Unemployment Transition Rate", file = "tr_IU_facets_axis.png")
+)
+
+# Generate plots
+for (tr in transition_rates) {
+  plot_comparison_facets(
+    combined_df,
+    tr$primary,
+    tr$secondary,
+    tr$title,
+    paste0("D:/PSID_SHELF/02_NLSY79/output/Mean_Compare/", tr$file)
+  )
+}
+
+```
+
+```{r}
+mean(TR_mean$TR_EMP_TO_UNEMP, na.rm = TRUE)
+mean(TR_mean$TR_UNEMP_TO_EMP, na.rm = TRUE)
+mean(TR_mean$TR_EMP_TO_INAC, na.rm = TRUE)
+mean(TR_mean$TR_INAC_TO_EMP, na.rm = TRUE)
+mean(TR_mean$TR_UNEMP_TO_INAC, na.rm = TRUE)
+mean(TR_mean$TR_INAC_TO_UNEMP, na.rm = TRUE)
+
+```
+
+
+```{r}
+mean(combined_df$Fallick_and_Fleischman_EU_Transition_Rate, na.rm = TRUE)
+mean(combined_df$Fallick_and_Fleischman_UE_Transition_Rate, na.rm = TRUE)
+mean(combined_df$Fallick_and_Fleischman_IE_Transition_Rate, na.rm = TRUE)
+mean(combined_df$Fallick_and_Fleischman_EI_Transition_Rate, na.rm = TRUE)
+mean(combined_df$Fallick_and_Fleischman_IU_Transition_Rate, na.rm = TRUE)
+mean(combined_df$Fallick_and_Fleischman_UI_Transition_Rate, na.rm = TRUE)
+
+```
+

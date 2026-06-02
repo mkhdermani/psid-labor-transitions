@@ -1,0 +1,196 @@
+---
+title: "CPS_BLS"
+author: "Mohsen Khalili"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(lubridate)
+library(zoo)
+library(ggplot2)
+library(dplyr)
+library(readxl)
+library(haven)
+library(tibble)
+```
+
+```{r}
+# Clear the workspace
+rm(list = ls())
+
+# Import Excel file
+data <- read_excel("D:/PSID_SHELF/Karlanser/Karlanser/CPS/CPS-BLS/compare_psid/PANEL_CPS.xlsx", sheet = "Sheet2")
+
+# Rename variables
+names(data)[names(data) == "LNU02000000"] <- "Employment_Level"
+names(data)[names(data) == "LNU07000000"] <- "EE"
+names(data)[names(data) == "LNU07100000"] <- "UE"
+names(data)[names(data) == "LNU07200000"] <- "IE"
+names(data)[names(data) == "LNU07300000"] <- "ME"
+names(data)[names(data) == "LNU03000000"] <- "Unemployment_Level"
+names(data)[names(data) == "LNU07400000"] <- "EU"
+names(data)[names(data) == "LNU07500000"] <- "UU"
+names(data)[names(data) == "LNU07600000"] <- "IU"
+names(data)[names(data) == "LNU07700000"] <- "MU"
+names(data)[names(data) == "LNU05000000"] <- "Not_in_Labor_Force"
+names(data)[names(data) == "LNU07800000"] <- "EI"
+names(data)[names(data) == "LNU07900000"] <- "UI"
+names(data)[names(data) == "LNU08000000"] <- "II"
+names(data)[names(data) == "LNU08100000"] <- "MI"
+names(data)[names(data) == "LNU08200000"] <- "EM"
+names(data)[names(data) == "LNU08300000"] <- "UM"
+```
+
+```{r}
+# Clean YEAR_MONTH by removing unwanted characters (\r\n)
+data$YEAR_MONTH <- gsub("\r\n", "", data$YEAR_MONTH)
+
+# Now, extract month and year
+data$month <- substr(data$YEAR_MONTH, 1, 3)
+data$year <- substr(data$YEAR_MONTH, 4, nchar(data$YEAR_MONTH))
+
+# Convert month abbreviation to month number
+data$month_num <- match(data$month, month.abb)
+
+# Combine year and month_num to create a yearmon object
+data$date_num <- as.yearmon(paste(data$year, data$month_num), "%Y %m")
+
+# Optionally, convert yearmon to Date (first day of each month for consistency)
+data$date <- as.Date(as.yearmon(data$date_num), frac = 0)
+
+# Sort the dataframe by date
+data <- data[order(data$date), ]
+```
+
+```{r}
+data$Employment_Level_lag <- lag(data$Employment_Level, -1)
+data$Unemployment_Level_lag <- lag(data$Unemployment_Level, -1)
+data$Not_in_Labor_Force_lag <- lag(data$Not_in_Labor_Force, -1)
+```
+
+```{r}
+data <- data %>%
+  arrange(date_num) %>%
+  mutate(Employment_Level_lag = lag(Employment_Level, 1),
+         Unemployment_Level_lag = lag(Unemployment_Level, 1),
+         Not_in_Labor_Force_lag = lag(Not_in_Labor_Force, 1)) %>%
+  mutate(
+    tr_EE = ifelse(Employment_Level_lag > 0, -log(1 - (EE / Employment_Level_lag)), NA),
+    tr_UU = ifelse(Unemployment_Level_lag > 0, -log(1 - (UU / Unemployment_Level_lag)), NA),
+    tr_II = ifelse(Not_in_Labor_Force_lag > 0, -log(1 - (II / Not_in_Labor_Force_lag)), NA),
+    tr_EU = ifelse(Employment_Level_lag > 0, -log(1 - (EU / Employment_Level_lag)), NA),
+    tr_UE = ifelse(Unemployment_Level_lag > 0, -log(1 - (UE / Unemployment_Level_lag)), NA),
+    tr_IE = ifelse(Employment_Level_lag > 0, -log(1 - (IE / Employment_Level_lag)), NA),
+    tr_EI = ifelse(Employment_Level_lag > 0, -log(1 - (EI / Employment_Level_lag)), NA),
+    tr_IU = ifelse(Not_in_Labor_Force_lag > 0, -log(1 - (IU / Not_in_Labor_Force_lag)), NA),
+    tr_UI = ifelse(Unemployment_Level_lag > 0, -log(1 - (UI / Unemployment_Level_lag)), NA)
+  )
+```
+
+```{r}
+data <- data %>% 
+  filter(date > as.Date("1990-12-31"))
+```
+
+```{r}
+# Plot Transition Rate: Employment to Unemployment
+ggplot(data, aes(x = date, y = tr_EU)) +
+  geom_line() +
+  labs(title = "Transition Rate: Employment to Unemployment", x = "Year", y = "Transition Rate") +
+  theme(legend.position = "none")
+ggsave("D:/PSID_SHELF/Karlanser/Karlanser/CPS/CPS-BLS/Graph/transition_rate_EU.png", width = 8, height = 6, dpi = 300)
+
+# Plot Transition Rate: Unemployment to Employment
+ggplot(data, aes(x = date, y = tr_UE)) +
+  geom_line() +
+  labs(title = "Transition Rate: Unemployment to Employment", x = "Year", y = "Transition Rate") +
+  theme(legend.position = "none")
+ggsave("D:/PSID_SHELF/Karlanser/Karlanser/CPS/CPS-BLS/Graph/transition_rate_UE.png", width = 8, height = 6, dpi = 300)
+
+# Plot Transition Rate: Employment to Inactivity
+ggplot(data, aes(x = date, y = tr_EI)) +
+  geom_line() +
+  labs(title = "Transition Rate: Employment to Inactivity", x = "Year", y = "Transition Rate") +
+  theme(legend.position = "none")
+ggsave("D:/PSID_SHELF/Karlanser/Karlanser/CPS/CPS-BLS/Graph/transition_rate_EI.png", width = 8, height = 6, dpi = 300)
+
+# Plot Transition Rate: Inactivity to Employment
+ggplot(data, aes(x = date, y = tr_IE)) +
+  geom_line() +
+  labs(title = "Transition Rate: Inactivity to Employment", x = "Year", y = "Transition Rate") +
+  theme(legend.position = "none")
+ggsave("D:/PSID_SHELF/Karlanser/Karlanser/CPS/CPS-BLS/Graph/transition_rate_IE.png", width = 8, height = 6, dpi = 300)
+
+# Plot Transition Rate: Unemployment to Inactivity
+ggplot(data, aes(x = date, y = tr_UI)) +
+  geom_line() +
+  labs(title = "Transition Rate: Unemployment to Inactivity", x = "Year", y = "Transition Rate") +
+  theme(legend.position = "none")
+ggsave("D:/PSID_SHELF/Karlanser/Karlanser/CPS/CPS-BLS/Graph/transition_rate_UI.png", width = 8, height = 6, dpi = 300)
+
+# Plot Transition Rate: Inactivity to Unemployment
+ggplot(data, aes(x = date, y = tr_IU)) +
+  geom_line() +
+  labs(title = "Transition Rate: Inactivity to Unemployment", x = "Year", y = "Transition Rate") +
+  theme(legend.position = "none")
+ggsave("D:/PSID_SHELF/Karlanser/Karlanser/CPS/CPS-BLS/Graph/transition_rate_IU.png", width = 8, height = 6, dpi = 300)
+
+# Plot Transition Rate: Employment to Employment
+ggplot(data, aes(x = date, y = tr_EE)) +
+  geom_line() +
+  labs(title = "Transition Rate: Employment to Employment", x = "Year", y = "Transition Rate") +
+  theme(legend.position = "none")
+ggsave("D:/PSID_SHELF/Karlanser/Karlanser/CPS/CPS-BLS/Graph/transition_rate_EE.png", width = 8, height = 6, dpi = 300)
+
+# Plot Transition Rate: Unemployment to Unemployment
+ggplot(data, aes(x = date, y = tr_UU)) +
+  geom_line() +
+  labs(title = "Transition Rate: Unemployment to Unemployment", x = "Year", y = "Transition Rate") +
+  theme(legend.position = "none")
+ggsave("D:/PSID_SHELF/Karlanser/Karlanser/CPS/CPS-BLS/Graph/transition_rate_UU.png", width = 8, height = 6, dpi = 300)
+
+# Plot Transition Rate: Inactivity to Inactivity
+ggplot(data, aes(x = date, y = tr_II)) +
+  geom_line() +
+  labs(title = "Transition Rate: Inactivity to Inactivity", x = "Year", y = "Transition Rate") +
+  theme(legend.position = "none")
+ggsave("D:/PSID_SHELF/Karlanser/Karlanser/CPS/CPS-BLS/Graph/transition_rate_II.png", width = 8, height = 6, dpi = 300)
+
+```
+```{r}
+# Convert 'year' to numeric if it's stored as a string
+data$year <- as.numeric(as.character(data$year))
+
+# Generate quarter variable based on 'month'
+data$quarter <- case_when(
+  data$month %in% c("Jan", "Feb", "Mar") ~ 1,
+  data$month %in% c("Apr", "May", "Jun") ~ 2,
+  data$month %in% c("Jul", "Aug", "Sep") ~ 3,
+  data$month %in% c("Oct", "Nov", "Dec") ~ 4,
+  TRUE ~ NA_real_
+)
+```
+
+```{r}
+# Using across() from dplyr to calculate mean transition rates by quarter and year for specified variables
+vars_to_mean <- c("tr_EU", "tr_UE", "tr_IE", "tr_EI", "tr_IU", "tr_UI")
+data <- data %>% 
+  group_by(year, quarter) %>% 
+  mutate(across(all_of(vars_to_mean), ~mean(.x, na.rm = TRUE), .names = "mean_{.col}_quarter"))
+
+```
+
+```{r}
+# Using across() from dplyr to calculate mean transition rates by quarter and year for specified variables
+vars_to_mean <- c("tr_EU", "tr_UE", "tr_IE", "tr_EI", "tr_IU", "tr_UI")
+data <- data %>% 
+  group_by(year, quarter) %>% 
+  mutate(across(all_of(vars_to_mean), ~mean(.x, na.rm = TRUE), .names = "mean_{.col}_quarter"))
+```
+
+

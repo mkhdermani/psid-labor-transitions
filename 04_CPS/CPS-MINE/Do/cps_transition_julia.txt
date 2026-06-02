@@ -1,0 +1,55 @@
+using DataFrames, StatFiles, Plots
+
+# Read CPS data file
+df = DataFrame(load("cps.dta"))
+
+# Keep observations where cpsidv > 0
+df = filter(row -> row.cpsidv > 0, df)
+
+# Sort data by household ID, year, and month
+sort!(df, [:year, :month, :cpsidv])
+
+# Create a time variable
+df[:time] = [Date(year, month, 1) for (year, month) in zip(df.year, df.month)]
+
+# Drop duplicate observations within panels
+df = unique(df, [:year, :month, :cpsidv])
+
+# Create a lagged variable for employment status within each household
+df.lag_emp_status_cps = lag(df.empstat, 1, groupby(df, :cpsidv))
+
+# Calculate sum of weights for transitions by month
+df.sum_weight_lag_unemp_cps = transform!(groupby(df, [:year, :month]), :wtfinl => ((x, y) -> sum(x[(y .>= 20) .& (y .<= 22)])) => :total, :lag_emp_status_cps)
+df.sum_weight_lag_emp_cps = transform!(groupby(df, [:year, :month]), :wtfinl => ((x, y) -> sum(x[(y .== 1) .| (y .== 10) .| (y .== 12)])) => :total, :lag_emp_status_cps)
+df.sum_weight_lag_inac_cps = transform!(groupby(df, [:year, :month]), :wtfinl => ((x, y) -> sum(x[(y .>= 30) .& (y .<= 36)])) => :total, :lag_emp_status_cps)
+
+# Create transition variables
+df.emp_to_unemp_cps = ((df.lag_emp_status_cps .== 1) .| (df.lag_emp_status_cps .== 10) .| (df.lag_emp_status_cps .== 12)) .& ((df.empstat .>= 20) .& (df.empstat .<= 22))
+df.unemp_to_emp_cps = ((df.lag_emp_status_cps .>= 20) .& (df.lag_emp_status_cps .<= 22)) .& ((df.empstat .== 1) .| (df.empstat .== 10) .| (df.empstat .== 12))
+df.emp_to_inac_cps = ((df.lag_emp_status_cps .== 1) .| (df.lag_emp_status_cps .== 10) .| (df.lag_emp_status_cps .== 12)) .& ((df.empstat .>= 30) .& (df.empstat .<= 36))
+df.inac_to_emp_cps = ((df.lag_emp_status_cps .>= 30) .& (df.lag_emp_status_cps .<= 36)) .& ((df.empstat .== 1) .| (df.empstat .== 10) .| (df.empstat .== 12))
+df.unemp_to_inac_cps = ((df.lag_emp_status_cps .>= 20) .& (df.lag_emp_status_cps .<= 22)) .& ((df.empstat .>= 30) .& (df.empstat .<= 36))
+df.inac_to_unemp_cps = ((df.lag_emp_status_cps .>= 30) .& (df.lag_emp_status_cps .<= 36)) .& ((df.empstat .>= 20) .& (df.empstat .<= 22))
+
+# Calculate transition rates with weights
+# Ensure to replace missing values with 0 for accurate division
+replace_missing!(df.sum_weight_lag_emp_cps, 0)
+replace_missing!(df.sum_weight_lag_unemp_cps, 0)
+replace_missing!(df.sum_weight_lag_inac_cps, 0)
+
+df.tr_emp_to_unemp_cps = -log.(1 .- (df.sum_weight_emp_to_unemp_cps ./ replace(df.sum_weight_lag_emp_cps, 0 => 1)))
+df.tr_unemp_to_emp_cps = -log.(1 .- (df.sum_weight_unemp_to_emp_cps ./ replace(df.sum_weight_lag_unemp_cps, 0 => 1)))
+df.tr_emp_to_inac_cps = -log.(1 .- (df.sum_weight_emp_to_inac_cps ./ replace(df.sum_weight_lag_emp_cps, 0 => 1)))
+df.tr_inac_to_emp_cps = -log.(1 .- (df.sum_weight_inac_to_emp_cps ./ replace(df.sum_weight_lag_inac_cps, 0 => 1)))
+df.tr_unemp_to_inac_cps = -log.(1 .- (df.sum_weight_unemp_to_inac_cps ./ replace(df.sum_weight_lag_unemp_cps, 0 => 1)))
+df.tr_inac_to_unemp_cps = -log.(1 .- (df.sum_weight_inac_to_unemp_cps ./ replace(df.sum_weight_lag_inac_cps, 0 => 1)))
+
+# Set the path for saving graphs
+path = "D:/PSID_SHELF/04_CPS/CPS-MINE/"
+
+# Plot and save graphs
+for transition in ["emp_to_unemp_cps", "unemp_to_emp_cps", "emp_to_inac_cps", "inac_to_emp_cps", "unemp_to_inac_cps", "inac_to_unemp_cps"]
+    p = plot(df.time, df[!, Symbol(transition)], title="Transition Rate: " * replace(transition, "_cps" => ""),
+             xlabel="Year", ylabel="Transition Rate", legend=false)
+    savefig(p, "$(path)$(transition).png")
+end

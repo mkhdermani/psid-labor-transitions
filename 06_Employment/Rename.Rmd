@@ -1,0 +1,1007 @@
+
+title: Monthly Employment
+author: Mohsen
+date: `r Sys.Date()`
+output:
+    html_document:
+      theme: readable    
+      highlight: kate
+      toc: true    
+      toc_depth: 4
+      toc_float: true    
+      data_print: paged
+      code_folding: hide    
+      css: styles.css
+editor_options:
+  markdown:
+    wrap: 72
+
+
+```{r setup, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, cache = TRUE)
+```
+
+```{r loadlibraries, warning=FALSE, message=FALSE}
+library(haven)
+library(tidyverse)
+library(readxl)
+library(stargazer)
+library(dplyr)
+library(tidyr)
+library(tempdisagg)
+library(zoo)
+library(foreign)
+library(ggplot2)
+library(lubridate)
+library(rlang)
+```
+
+```{r loadd_ata, warning=FALSE, message=FALSE}
+data <- read_excel("D:/PSID_SHELF/06_Employment/employment_monthly_data.xlsx", sheet = "Data")
+```
+
+```{r rename_variables_INDIVIDUAL, warning=FALSE, message=FALSE}
+data <- data %>%
+  rename(
+    SEX_ = ER32000,
+    IN_SAMPLE_ = ER32006,
+    INTERVIEW_1993 = ER30806,
+    SEQUENCE_1993 = ER30807, 
+    RELATION_1993 = ER30808,
+    RELEASE_NUMBER = ER30000,                          
+    ID_1968 = ER30001,                   
+    PERSON_NUMBER = ER30002,
+    INTERVIEW_1997 = ER33401, 
+    SEQUENCE_1997 = ER33402, 
+    RELATION_1997 = ER33403,
+    INTERVIEW_1999 = ER33501, 
+    SEQUENCE_1999 = ER33502, 
+    RELATION_1999 = ER33503,
+    INTERVIEW_2001 = ER33601, 
+    SEQUENCE_2001 = ER33602, 
+    RELATION_2001 = ER33603,
+    INTERVIEW_2003 = ER33701, 
+    SEQUENCE_2003 = ER33702, 
+    RELATION_2003 = ER33703,
+    INTERVIEW_2005 = ER33801, 
+    SEQUENCE_2005 = ER33802, 
+    RELATION_2005 = ER33803,
+    INTERVIEW_2007 = ER33901, 
+    SEQUENCE_2007 = ER33902, 
+    RELATION_2007 = ER33903,
+    INTERVIEW_2009 = ER34001, 
+    SEQUENCE_2009 = ER34002, 
+    RELATION_2009 = ER34003,
+    INTERVIEW_2011 = ER34101, 
+    SEQUENCE_2011 = ER34102, 
+    RELATION_2011 = ER34103,
+    INTERVIEW_2013 = ER34201, 
+    SEQUENCE_2013 = ER34202, 
+    RELATION_2013 = ER34203,
+    INTERVIEW_2015 = ER34301, 
+    SEQUENCE_2015 = ER34302, 
+    RELATION_2015 = ER34303,
+    INTERVIEW_2017 = ER34501, 
+    SEQUENCE_2017 = ER34502, 
+    RELATION_2017 = ER34503,
+    INTERVIEW_2019 = ER34701, 
+    SEQUENCE_2019 = ER34702, 
+    RELATION_2019 = ER34703,
+    INTERVIEW_2021 = ER34901, 
+    SEQUENCE_2021 = ER34902, 
+    RELATION_2021 = ER34903
+  )%>%
+  select(-RELEASE_NUMBER, -INTERVIEW_1993, -SEQUENCE_1993, -RELATION_1993, -RELATION_1997, -RELATION_1999)
+
+data <- data %>%
+  mutate(ID = ID_1968 + (1000 * PERSON_NUMBER)) %>%
+           select(-ID_1968,-PERSON_NUMBER)
+
+```
+
+```{r rename_variables_ID, warning=FALSE, message=FALSE}
+data <- data %>%
+  rename(
+    ID_1997 = ER10005G,
+    ID_1999 = ER13019,
+    ID_2001 = ER17022,
+    ID_2003 = ER21009,
+    ID_2005 = ER25009,
+    ID_2007 = ER36009,
+    ID_2009 = ER42009,
+    ID_2011 = ER47309,
+    ID_2013 = ER53009,
+    ID_2015 = ER60009,
+    ID_2017 = ER66009,
+    ID_2019 = ER72009,
+    ID_2021 = ER78009
+  )
+```
+
+```{r rename_variables_UNE, warning=FALSE, message=FALSE}
+data <- data %>%
+  rename(
+    UNE_JAN_1992 = V21640,
+    UNE_FEB_1992 = V21641,
+    UNE_MAR_1992 = V21642,
+    UNE_APR_1992 = V21643,
+    UNE_MAY_1992 = V21644,
+    UNE_JUN_1992 = V21645,
+    UNE_JUL_1992 = V21646,
+    UNE_AUG_1992 = V21647,
+    UNE_SEP_1992 = V21648,
+    UNE_OCT_1992 = V21649,
+    UNE_NOV_1992 = V21650,
+    UNE_DEC_1992 = V21651,
+   
+    UNE_JAN_2001 = ER23702A3,
+    UNE_FEB_2001 = ER23702A4,
+    UNE_MAR_2001 = ER23702A5,
+    UNE_APR_2001 = ER23702A6,
+    UNE_MAY_2001 = ER23702A7,
+    UNE_JUN_2001 = ER23702A8,
+    UNE_JUL_2001 = ER23702A9,
+    UNE_AUG_2001 = ER23702B1,
+    UNE_SEP_2001 = ER23702B2,
+    UNE_OCT_2001 = ER23702B3,
+    UNE_NOV_2001 = ER23702B4,
+    UNE_DEC_2001 = ER23702B5,
+    
+    UNE_JAN_2002 = ER21324,
+    UNE_FEB_2002 = ER21325,
+    UNE_MAR_2002 = ER21326,
+    UNE_APR_2002 = ER21327,
+    UNE_MAY_2002 = ER21328,
+    UNE_JUN_2002 = ER21329,
+    UNE_JUL_2002 = ER21330,
+    UNE_AUG_2002 = ER21331,
+    UNE_SEP_2002 = ER21332,
+    UNE_OCT_2002 = ER21333,
+    UNE_NOV_2002 = ER21334,
+    UNE_DEC_2002 = ER21335,
+    
+    UNE_JAN_2003 = ER27711A3,
+    UNE_FEB_2003 = ER27711A4,
+    UNE_MAR_2003 = ER27711A5,
+    UNE_APR_2003 = ER27711A6,
+    UNE_MAY_2003 = ER27711A7,
+    UNE_JUN_2003 = ER27711A8,
+    UNE_JUL_2003 = ER27711A9,
+    UNE_AUG_2003 = ER27711B1,
+    UNE_SEP_2003 = ER27711B2,
+    UNE_OCT_2003 = ER27711B3,
+    UNE_NOV_2003 = ER27711B4,
+    UNE_DEC_2003 = ER27711B5,
+    
+    UNE_JAN_2004 = ER25313,
+    UNE_FEB_2004 = ER25314,
+    UNE_MAR_2004 = ER25315,
+    UNE_APR_2004 = ER25316,
+    UNE_MAY_2004 = ER25317,
+    UNE_JUN_2004 = ER25318,
+    UNE_JUL_2004 = ER25319,
+    UNE_AUG_2004 = ER25320,
+    UNE_SEP_2004 = ER25321,
+    UNE_OCT_2004 = ER25322,
+    UNE_NOV_2004 = ER25323,
+    UNE_DEC_2004 = ER25324,
+    
+    UNE_JAN_2005 = ER40686A3,
+    UNE_FEB_2005 = ER40686A4,
+    UNE_MAR_2005 = ER40686A5,
+    UNE_APR_2005 = ER40686A6,
+    UNE_MAY_2005 = ER40686A7,
+    UNE_JUN_2005 = ER40686A8,
+    UNE_JUL_2005 = ER40686A9,
+    UNE_AUG_2005 = ER40686B1,
+    UNE_SEP_2005 = ER40686B2,
+    UNE_OCT_2005 = ER40686B3,
+    UNE_NOV_2005 = ER40686B4,
+    UNE_DEC_2005 = ER40686B5,
+    
+    UNE_JAN_2006 = ER36318,
+    UNE_FEB_2006 = ER36319,
+    UNE_MAR_2006 = ER36320,
+    UNE_APR_2006 = ER36321,
+    UNE_MAY_2006 = ER36322,
+    UNE_JUN_2006 = ER36323,
+    UNE_JUL_2006 = ER36324,
+    UNE_AUG_2006 = ER36325,
+    UNE_SEP_2006 = ER36326,
+    UNE_OCT_2006 = ER36327,
+    UNE_NOV_2006 = ER36328,
+    UNE_DEC_2006 = ER36329,
+    
+    UNE_JAN_2007 = ER46666A,
+    UNE_FEB_2007 = ER46666B,
+    UNE_MAR_2007 = ER46666C,
+    UNE_APR_2007 = ER46666D,
+    UNE_MAY_2007 = ER46666E,
+    UNE_JUN_2007 = ER46666F,
+    UNE_JUL_2007 = ER46666G,
+    UNE_AUG_2007 = ER46666H,
+    UNE_SEP_2007 = ER46666I,
+    UNE_OCT_2007 = ER46666J,
+    UNE_NOV_2007 = ER46666K,
+    UNE_DEC_2007 = ER46666L,
+    
+    UNE_JAN_2008 = ER42345,
+    UNE_FEB_2008 = ER42346,
+    UNE_MAR_2008 = ER42347,
+    UNE_APR_2008 = ER42348,
+    UNE_MAY_2008 = ER42349,
+    UNE_JUN_2008 = ER42350,
+    UNE_JUL_2008 = ER42351,
+    UNE_AUG_2008 = ER42352,
+    UNE_SEP_2008 = ER42353,
+    UNE_OCT_2008 = ER42354,
+    UNE_NOV_2008 = ER42355,
+    UNE_DEC_2008 = ER42356,
+    
+    UNE_JAN_2009 = ER52067A,
+    UNE_FEB_2009 = ER52067B,
+    UNE_MAR_2009 = ER52067C,
+    UNE_APR_2009 = ER52067D,
+    UNE_MAY_2009 = ER52067E,
+    UNE_JUN_2009 = ER52067F,
+    UNE_JUL_2009 = ER52067G,
+    UNE_AUG_2009 = ER52067H,
+    UNE_SEP_2009 = ER52067I,
+    UNE_OCT_2009 = ER52067J,
+    UNE_NOV_2009 = ER52067K,
+    UNE_DEC_2009 = ER52067L,
+    
+    UNE_JAN_2010 = ER47658,
+    UNE_FEB_2010 = ER47659,
+    UNE_MAR_2010 = ER47660,
+    UNE_APR_2010 = ER47661,
+    UNE_MAY_2010 = ER47662,
+    UNE_JUN_2010 = ER47663,
+    UNE_JUL_2010 = ER47664,
+    UNE_AUG_2010 = ER47665,
+    UNE_SEP_2010 = ER47666,
+    UNE_OCT_2010 = ER47667,
+    UNE_NOV_2010 = ER47668,
+    UNE_DEC_2010 = ER47669,
+    
+    UNE_JAN_2011 = ER57798,
+    UNE_FEB_2011 = ER57799,
+    UNE_MAR_2011 = ER57800,
+    UNE_APR_2011 = ER57801,
+    UNE_MAY_2011 = ER57802,
+    UNE_JUN_2011 = ER57803,
+    UNE_JUL_2011 = ER57804,
+    UNE_AUG_2011 = ER57805,
+    UNE_SEP_2011 = ER57806,
+    UNE_OCT_2011 = ER57807,
+    UNE_NOV_2011 = ER57808,
+    UNE_DEC_2011 = ER57809,
+    
+    UNE_JAN_2012 = ER53358,
+    UNE_FEB_2012 = ER53359,
+    UNE_MAR_2012 = ER53360,
+    UNE_APR_2012 = ER53361,
+    UNE_MAY_2012 = ER53362,
+    UNE_JUN_2012 = ER53363,
+    UNE_JUL_2012 = ER53364,
+    UNE_AUG_2012 = ER53365,
+    UNE_SEP_2012 = ER53366,
+    UNE_OCT_2012 = ER53367,
+    UNE_NOV_2012 = ER53368,
+    UNE_DEC_2012 = ER53369,
+    
+    UNE_JAN_2013 = ER64978,
+    UNE_FEB_2013 = ER64979,
+    UNE_MAR_2013 = ER64980,
+    UNE_APR_2013 = ER64981,
+    UNE_MAY_2013 = ER64982,
+    UNE_JUN_2013 = ER64983,
+    UNE_JUL_2013 = ER64984,
+    UNE_AUG_2013 = ER64985,
+    UNE_SEP_2013 = ER64986,
+    UNE_OCT_2013 = ER64987,
+    UNE_NOV_2013 = ER64988,
+    UNE_DEC_2013 = ER64989,
+    
+    UNE_JAN_2014 = ER60373,
+    UNE_FEB_2014 = ER60374,
+    UNE_MAR_2014 = ER60375,
+    UNE_APR_2014 = ER60376,
+    UNE_MAY_2014 = ER60377,
+    UNE_JUN_2014 = ER60378,
+    UNE_JUL_2014 = ER60379,
+    UNE_AUG_2014 = ER60380,
+    UNE_SEP_2014 = ER60381,
+    UNE_OCT_2014 = ER60382,
+    UNE_NOV_2014 = ER60383,
+    UNE_DEC_2014 = ER60384,
+    
+    UNE_JAN_2015 = ER71070,
+    UNE_FEB_2015 = ER71071,
+    UNE_MAR_2015 = ER71072,
+    UNE_APR_2015 = ER71073,
+    UNE_MAY_2015 = ER71074,
+    UNE_JUN_2015 = ER71075,
+    UNE_JUL_2015 = ER71076,
+    UNE_AUG_2015 = ER71077,
+    UNE_SEP_2015 = ER71078,
+    UNE_OCT_2015 = ER71079,
+    UNE_NOV_2015 = ER71080,
+    UNE_DEC_2015 = ER71081,
+    
+    UNE_JAN_2016 = ER66376,
+    UNE_FEB_2016 = ER66377,
+    UNE_MAR_2016 = ER66378,
+    UNE_APR_2016 = ER66379,
+    UNE_MAY_2016 = ER66380,
+    UNE_JUN_2016 = ER66381,
+    UNE_JUL_2016 = ER66382,
+    UNE_AUG_2016 = ER66383,
+    UNE_SEP_2016 = ER66384,
+    UNE_OCT_2016 = ER66385,
+    UNE_NOV_2016 = ER66386,
+    UNE_DEC_2016 = ER66387,
+    
+    UNE_JAN_2017 = ER77092,
+    UNE_FEB_2017 = ER77093,
+    UNE_MAR_2017 = ER77094,
+    UNE_APR_2017 = ER77095,
+    UNE_MAY_2017 = ER77096,
+    UNE_JUN_2017 = ER77097,
+    UNE_JUL_2017 = ER77098,
+    UNE_AUG_2017 = ER77099,
+    UNE_SEP_2017 = ER77100,
+    UNE_OCT_2017 = ER77101,
+    UNE_NOV_2017 = ER77102,
+    UNE_DEC_2017 = ER77103,
+    
+    UNE_JAN_2018 = ER72376,
+    UNE_FEB_2018 = ER72377,
+    UNE_MAR_2018 = ER72378,
+    UNE_APR_2018 = ER72379,
+    UNE_MAY_2018 = ER72380,
+    UNE_JUN_2018 = ER72381,
+    UNE_JUL_2018 = ER72382,
+    UNE_AUG_2018 = ER72383,
+    UNE_SEP_2018 = ER72384,
+    UNE_OCT_2018 = ER72385,
+    UNE_NOV_2018 = ER72386,
+    UNE_DEC_2018 = ER72387,
+    
+    UNE_JAN_2019 = ER81428,
+    UNE_FEB_2019 = ER81429,
+    UNE_MAR_2019 = ER81430,
+    UNE_APR_2019 = ER81431,
+    UNE_MAY_2019 = ER81432,
+    UNE_JUN_2019 = ER81433,
+    UNE_JUL_2019 = ER81434,
+    UNE_AUG_2019 = ER81435,
+    UNE_SEP_2019 = ER81436,
+    UNE_OCT_2019 = ER81437,
+    UNE_NOV_2019 = ER81438,
+    UNE_DEC_2019 = ER81439,
+    
+    UNE_JAN_2020 = ER78415,
+    UNE_FEB_2020 = ER78416,
+    UNE_MAR_2020 = ER78417,
+    UNE_APR_2020 = ER78418,
+    UNE_MAY_2020 = ER78419,
+    UNE_JUN_2020 = ER78420,
+    UNE_JUL_2020 = ER78421,
+    UNE_AUG_2020 = ER78422,
+    UNE_SEP_2020 = ER78423,
+    UNE_OCT_2020 = ER78424,
+    UNE_NOV_2020 = ER78425,
+    UNE_DEC_2020 = ER78426
+  )
+
+data <- data %>%
+  select(
+    -UNE_JAN_1992,
+    -UNE_FEB_1992,
+    -UNE_MAR_1992,
+    -UNE_APR_1992,
+    -UNE_MAY_1992,
+    -UNE_JUN_1992,
+    -UNE_JUL_1992,
+    -UNE_AUG_1992,
+    -UNE_SEP_1992,
+    -UNE_OCT_1992,
+    -UNE_NOV_1992,
+    -UNE_DEC_1992
+  )
+```
+
+```{r rename_variables_OUT, warning=FALSE, message=FALSE}
+data <- data %>%
+  rename(
+    OUT_JAN_1992 = V21652,
+    OUT_FEB_1992 = V21653,
+    OUT_MAR_1992 = V21654,
+    OUT_APR_1992 = V21655,
+    OUT_MAY_1992 = V21656,
+    OUT_JUN_1992 = V21657,
+    OUT_JUL_1992 = V21658,
+    OUT_AUG_1992 = V21659,
+    OUT_SEP_1992 = V21660,
+    OUT_OCT_1992 = V21661,
+    OUT_NOV_1992 = V21662,
+    OUT_DEC_1992 = V21663,
+
+    OUT_JAN_2001 = ER23702B8,
+    OUT_FEB_2001 = ER23702B9,
+    OUT_MAR_2001 = ER23702C1,
+    OUT_APR_2001 = ER23702C2,
+    OUT_MAY_2001 = ER23702C3,
+    OUT_JUN_2001 = ER23702C4,
+    OUT_JUL_2001 = ER23702C5,
+    OUT_AUG_2001 = ER23702C6,
+    OUT_SEP_2001 = ER23702C7,
+    OUT_OCT_2001 = ER23702C8,
+    OUT_NOV_2001 = ER23702C9,
+    OUT_DEC_2001 = ER23702D1,
+
+    OUT_JAN_2002 = ER21343,
+    OUT_FEB_2002 = ER21344,
+    OUT_MAR_2002 = ER21345,
+    OUT_APR_2002 = ER21346,
+    OUT_MAY_2002 = ER21347,
+    OUT_JUN_2002 = ER21348,
+    OUT_JUL_2002 = ER21349,
+    OUT_AUG_2002 = ER21350,
+    OUT_SEP_2002 = ER21351,
+    OUT_OCT_2002 = ER21352,
+    OUT_NOV_2002 = ER21353,
+    OUT_DEC_2002 = ER21354,   
+
+    OUT_JAN_2003 = ER27711B8,
+    OUT_FEB_2003 = ER27711B9,
+    OUT_MAR_2003 = ER27711C1,
+    OUT_APR_2003 = ER27711C2,
+    OUT_MAY_2003 = ER27711C3,
+    OUT_JUN_2003 = ER27711C4,
+    OUT_JUL_2003 = ER27711C5,
+    OUT_AUG_2003 = ER27711C6,
+    OUT_SEP_2003 = ER27711C7,
+    OUT_OCT_2003 = ER27711C8,
+    OUT_NOV_2003 = ER27711C9,
+    OUT_DEC_2003 = ER27711D1,
+
+    OUT_JAN_2004 = ER25332,
+    OUT_FEB_2004 = ER25333,
+    OUT_MAR_2004 = ER25334,
+    OUT_APR_2004 = ER25335,
+    OUT_MAY_2004 = ER25336,
+    OUT_JUN_2004 = ER25337,
+    OUT_JUL_2004 = ER25338,
+    OUT_AUG_2004 = ER25339,
+    OUT_SEP_2004 = ER25340,
+    OUT_OCT_2004 = ER25341,
+    OUT_NOV_2004 = ER25342,
+    OUT_DEC_2004 = ER25343,
+
+    OUT_JAN_2005 = ER40686B8,        
+    OUT_FEB_2005 = ER40686B9,        
+    OUT_MAR_2005 = ER40686C1,        
+    OUT_APR_2005 = ER40686C2,        
+    OUT_MAY_2005 = ER40686C3,        
+    OUT_JUN_2005 = ER40686C4,        
+    OUT_JUL_2005 = ER40686C5,        
+    OUT_AUG_2005 = ER40686C6,        
+    OUT_SEP_2005 = ER40686C7,        
+    OUT_OCT_2005 = ER40686C8,        
+    OUT_NOV_2005 = ER40686C9,        
+    OUT_DEC_2005 = ER40686D1,
+
+    OUT_JAN_2006 = ER36337,          
+    OUT_FEB_2006 = ER36338,                
+    OUT_MAR_2006 = ER36339,                
+    OUT_APR_2006 = ER36340,                
+    OUT_MAY_2006 = ER36341,                
+    OUT_JUN_2006 = ER36342,                
+    OUT_JUL_2006 = ER36343,                
+    OUT_AUG_2006 = ER36344,                
+    OUT_SEP_2006 = ER36345,                
+    OUT_OCT_2006 = ER36346,                
+    OUT_NOV_2006 = ER36347,                
+    OUT_DEC_2006 = ER36348,
+
+    OUT_JAN_2007 = ER46668A,
+    OUT_FEB_2007 = ER46668B,
+    OUT_MAR_2007 = ER46668C,
+    OUT_APR_2007 = ER46668D,
+    OUT_MAY_2007 = ER46668E,
+    OUT_JUN_2007 = ER46668F,
+    OUT_JUL_2007 = ER46668G,
+    OUT_AUG_2007 = ER46668H,
+    OUT_SEP_2007 = ER46668I,
+    OUT_OCT_2007 = ER46668J,
+    OUT_NOV_2007 = ER46668K,
+    OUT_DEC_2007 = ER46668L,
+
+    OUT_JAN_2008 = ER42364,
+    OUT_FEB_2008 = ER42365,
+    OUT_MAR_2008 = ER42366,
+    OUT_APR_2008 = ER42367,
+    OUT_MAY_2008 = ER42368,
+    OUT_JUN_2008 = ER42369,
+    OUT_JUL_2008 = ER42370,
+    OUT_AUG_2008 = ER42371,
+    OUT_SEP_2008 = ER42372,
+    OUT_OCT_2008 = ER42373,
+    OUT_NOV_2008 = ER42374,
+    OUT_DEC_2008 = ER42375,
+
+    OUT_JAN_2009 = ER52069A,
+    OUT_FEB_2009 = ER52069B,
+    OUT_MAR_2009 = ER52069C,
+    OUT_APR_2009 = ER52069D,
+    OUT_MAY_2009 = ER52069E,
+    OUT_JUN_2009 = ER52069F,
+    OUT_JUL_2009 = ER52069G,
+    OUT_AUG_2009 = ER52069H,
+    OUT_SEP_2009 = ER52069I,
+    OUT_OCT_2009 = ER52069J,
+    OUT_NOV_2009 = ER52069K,
+    OUT_DEC_2009 = ER52069L,
+
+    OUT_JAN_2010 = ER47677,
+    OUT_FEB_2010 = ER47678,
+    OUT_MAR_2010 = ER47679,
+    OUT_APR_2010 = ER47680,
+    OUT_MAY_2010 = ER47681,
+    OUT_JUN_2010 = ER47682,
+    OUT_JUL_2010 = ER47683,
+    OUT_AUG_2010 = ER47684,
+    OUT_SEP_2010 = ER47685,
+    OUT_OCT_2010 = ER47686,
+    OUT_NOV_2010 = ER47687,
+    OUT_DEC_2010 = ER47688,
+
+    OUT_JAN_2011 = ER57812,
+    OUT_FEB_2011 = ER57813,
+    OUT_MAR_2011 = ER57814,
+    OUT_APR_2011 = ER57815,
+    OUT_MAY_2011 = ER57816,
+    OUT_JUN_2011 = ER57817,
+    OUT_JUL_2011 = ER57818,
+    OUT_AUG_2011 = ER57819,
+    OUT_SEP_2011 = ER57820,
+    OUT_OCT_2011 = ER57821,
+    OUT_NOV_2011 = ER57822,
+    OUT_DEC_2011 = ER57823,
+
+    OUT_JAN_2012 = ER53377,
+    OUT_FEB_2012 = ER53378,
+    OUT_MAR_2012 = ER53379,
+    OUT_APR_2012 = ER53380,
+    OUT_MAY_2012 = ER53381,
+    OUT_JUN_2012 = ER53382,
+    OUT_JUL_2012 = ER53383,
+    OUT_AUG_2012 = ER53384,
+    OUT_SEP_2012 = ER53385,
+    OUT_OCT_2012 = ER53386,
+    OUT_NOV_2012 = ER53387,
+    OUT_DEC_2012 = ER53388,
+
+    OUT_JAN_2013 = ER64992,
+    OUT_FEB_2013 = ER64993,
+    OUT_MAR_2013 = ER64994,
+    OUT_APR_2013 = ER64995,
+    OUT_MAY_2013 = ER64996,
+    OUT_JUN_2013 = ER64997,
+    OUT_JUL_2013 = ER64998,
+    OUT_AUG_2013 = ER64999,
+    OUT_SEP_2013 = ER65000,
+    OUT_OCT_2013 = ER65001,
+    OUT_NOV_2013 = ER65002,
+    OUT_DEC_2013 = ER65003,
+
+    OUT_JAN_2014 = ER60392,
+    OUT_FEB_2014 = ER60393,
+    OUT_MAR_2014 = ER60394,
+    OUT_APR_2014 = ER60395,
+    OUT_MAY_2014 = ER60396,
+    OUT_JUN_2014 = ER60397,
+    OUT_JUL_2014 = ER60398,
+    OUT_AUG_2014 = ER60399,
+    OUT_SEP_2014 = ER60400,
+    OUT_OCT_2014 = ER60401,
+    OUT_NOV_2014 = ER60402,
+    OUT_DEC_2014 = ER60403,
+
+    OUT_JAN_2015 = ER71084,
+    OUT_FEB_2015 = ER71085,
+    OUT_MAR_2015 = ER71086,
+    OUT_APR_2015 = ER71087,
+    OUT_MAY_2015 = ER71088,
+    OUT_JUN_2015 = ER71089,
+    OUT_JUL_2015 = ER71090,
+    OUT_AUG_2015 = ER71091,
+    OUT_SEP_2015 = ER71092,
+    OUT_OCT_2015 = ER71093,
+    OUT_NOV_2015 = ER71094,
+    OUT_DEC_2015 = ER71095,
+
+    OUT_JAN_2016 = ER66395,
+    OUT_FEB_2016 = ER66396,
+    OUT_MAR_2016 = ER66397,
+    OUT_APR_2016 = ER66398,
+    OUT_MAY_2016 = ER66399,
+    OUT_JUN_2016 = ER66400,
+    OUT_JUL_2016 = ER66401,
+    OUT_AUG_2016 = ER66402,
+    OUT_SEP_2016 = ER66403,
+    OUT_OCT_2016 = ER66404,
+    OUT_NOV_2016 = ER66405,
+    OUT_DEC_2016 = ER66406,
+
+    OUT_JAN_2017 = ER77106,
+    OUT_FEB_2017 = ER77107,
+    OUT_MAR_2017 = ER77108,
+    OUT_APR_2017 = ER77109,
+    OUT_MAY_2017 = ER77110,
+    OUT_JUN_2017 = ER77111,
+    OUT_JUL_2017 = ER77112,
+    OUT_AUG_2017 = ER77113,
+    OUT_SEP_2017 = ER77114,
+    OUT_OCT_2017 = ER77115,
+    OUT_NOV_2017 = ER77116,
+    OUT_DEC_2017 = ER77117,
+
+    OUT_JAN_2018 = ER72395,
+    OUT_FEB_2018 = ER72396,
+    OUT_MAR_2018 = ER72397,
+    OUT_APR_2018 = ER72398,
+    OUT_MAY_2018 = ER72399,
+    OUT_JUN_2018 = ER72400,
+    OUT_JUL_2018 = ER72401,
+    OUT_AUG_2018 = ER72402,
+    OUT_SEP_2018 = ER72403,
+    OUT_OCT_2018 = ER72404,
+    OUT_NOV_2018 = ER72405,
+    OUT_DEC_2018 = ER72406,
+
+    OUT_JAN_2019 = ER81442,
+    OUT_FEB_2019 = ER81443,
+    OUT_MAR_2019 = ER81444,
+    OUT_APR_2019 = ER81445,
+    OUT_MAY_2019 = ER81446,
+    OUT_JUN_2019 = ER81447,
+    OUT_JUL_2019 = ER81448,
+    OUT_AUG_2019 = ER81449,
+    OUT_SEP_2019 = ER81450,
+    OUT_OCT_2019 = ER81451,
+    OUT_NOV_2019 = ER81452,
+    OUT_DEC_2019 = ER81453,
+
+    OUT_JAN_2020 = ER78434,
+    OUT_FEB_2020 = ER78435,
+    OUT_MAR_2020 = ER78436,
+    OUT_APR_2020 = ER78437,
+    OUT_MAY_2020 = ER78438,
+    OUT_JUN_2020 = ER78439,
+    OUT_JUL_2020 = ER78440,
+    OUT_AUG_2020 = ER78441,
+    OUT_SEP_2020 = ER78442,
+    OUT_OCT_2020 = ER78443,
+    OUT_NOV_2020 = ER78444,
+    OUT_DEC_2020 = ER78445,
+
+  )
+
+data <- data %>%
+  select(
+    -OUT_JAN_1992,
+    -OUT_FEB_1992,
+    -OUT_MAR_1992,
+    -OUT_APR_1992,
+    -OUT_MAY_1992,
+    -OUT_JUN_1992,
+    -OUT_JUL_1992,
+    -OUT_AUG_1992,
+    -OUT_SEP_1992,
+    -OUT_OCT_1992,
+    -OUT_NOV_1992,
+    -OUT_DEC_1992
+  )
+```
+
+```{r rename_variables_EMP, warning=FALSE, message=FALSE}
+data <- data %>%
+  rename(
+    EMP_JAN_2001 = ER23702D5,
+    EMP_FEB_2001 = ER23702D6,
+    EMP_MAR_2001 = ER23702D7,
+    EMP_APR_2001 = ER23702D8,
+    EMP_MAY_2001 = ER23702D9,
+    EMP_JUN_2001 = ER23702E1,
+    EMP_JUL_2001 = ER23702E2,
+    EMP_AUG_2001 = ER23702E3,
+    EMP_SEP_2001 = ER23702E4,
+    EMP_OCT_2001 = ER23702E5,
+    EMP_NOV_2001 = ER23702E6,
+    EMP_DEC_2001 = ER23702E7,
+
+    EMP_JAN_2003 = ER27711D5,
+    EMP_FEB_2003 = ER27711D6,
+    EMP_MAR_2003 = ER27711D7,
+    EMP_APR_2003 = ER27711D8,
+    EMP_MAY_2003 = ER27711D9,
+    EMP_JUN_2003 = ER27711E1,
+    EMP_JUL_2003 = ER27711E2,
+    EMP_AUG_2003 = ER27711E3,
+    EMP_SEP_2003 = ER27711E4,
+    EMP_OCT_2003 = ER27711E5,
+    EMP_NOV_2003 = ER27711E6,
+    EMP_DEC_2003 = ER27711E7,
+
+    EMP_JAN_2005 = ER40686D5,
+    EMP_FEB_2005 = ER40686D6,
+    EMP_MAR_2005 = ER40686D7,
+    EMP_APR_2005 = ER40686D8,
+    EMP_MAY_2005 = ER40686D9,
+    EMP_JUN_2005 = ER40686E1,
+    EMP_JUL_2005 = ER40686E2,
+    EMP_AUG_2005 = ER40686E3,
+    EMP_SEP_2005 = ER40686E4,
+    EMP_OCT_2005 = ER40686E5,
+    EMP_NOV_2005 = ER40686E6,
+    EMP_DEC_2005 = ER40686E7,
+
+    EMP_JAN_2007 = ER46670B,
+    EMP_FEB_2007 = ER46670C,
+    EMP_MAR_2007 = ER46670D,
+    EMP_APR_2007 = ER46670E,
+    EMP_MAY_2007 = ER46670F,
+    EMP_JUN_2007 = ER46670G,
+    EMP_JUL_2007 = ER46670H,
+    EMP_AUG_2007 = ER46670I,
+    EMP_SEP_2007 = ER46670J,
+    EMP_OCT_2007 = ER46670K,
+    EMP_NOV_2007 = ER46670L,
+    EMP_DEC_2007 = ER46670M,
+
+    EMP_JAN_2009 = ER52071B,
+    EMP_FEB_2009 = ER52071C,
+    EMP_MAR_2009 = ER52071D,
+    EMP_APR_2009 = ER52071E,
+    EMP_MAY_2009 = ER52071F,
+    EMP_JUN_2009 = ER52071G,
+    EMP_JUL_2009 = ER52071H,
+    EMP_AUG_2009 = ER52071I,
+    EMP_SEP_2009 = ER52071J,
+    EMP_OCT_2009 = ER52071K,
+    EMP_NOV_2009 = ER52071L,
+    EMP_DEC_2009 = ER52071M,
+
+    EMP_JAN_2011 = ER57827,
+    EMP_FEB_2011 = ER57828,
+    EMP_MAR_2011 = ER57829,
+    EMP_APR_2011 = ER57830,
+    EMP_MAY_2011 = ER57831,
+    EMP_JUN_2011 = ER57832,
+    EMP_JUL_2011 = ER57833,
+    EMP_AUG_2011 = ER57834,
+    EMP_SEP_2011 = ER57835,
+    EMP_OCT_2011 = ER57836,
+    EMP_NOV_2011 = ER57837,
+    EMP_DEC_2011 = ER57838,
+
+    EMP_JAN_2013 = ER65007,
+    EMP_FEB_2013 = ER65008,
+    EMP_MAR_2013 = ER65009,
+    EMP_APR_2013 = ER65010,
+    EMP_MAY_2013 = ER65011,
+    EMP_JUN_2013 = ER65012,
+    EMP_JUL_2013 = ER65013,
+    EMP_AUG_2013 = ER65014,
+    EMP_SEP_2013 = ER65015,
+    EMP_OCT_2013 = ER65016,
+    EMP_NOV_2013 = ER65017,
+    EMP_DEC_2013 = ER65018,
+
+    EMP_JAN_2015 = ER71099,
+    EMP_FEB_2015 = ER71100,
+    EMP_MAR_2015 = ER71101,
+    EMP_APR_2015 = ER71102,
+    EMP_MAY_2015 = ER71103,
+    EMP_JUN_2015 = ER71104,
+    EMP_JUL_2015 = ER71105,
+    EMP_AUG_2015 = ER71106,
+    EMP_SEP_2015 = ER71107,
+    EMP_OCT_2015 = ER71108,
+    EMP_NOV_2015 = ER71109,
+    EMP_DEC_2015 = ER71110,
+
+    EMP_JAN_2017 = ER77121,
+    EMP_FEB_2017 = ER77122,
+    EMP_MAR_2017 = ER77123,
+    EMP_APR_2017 = ER77124,
+    EMP_MAY_2017 = ER77125,
+    EMP_JUN_2017 = ER77126,
+    EMP_JUL_2017 = ER77127,
+    EMP_AUG_2017 = ER77128,
+    EMP_SEP_2017 = ER77129,
+    EMP_OCT_2017 = ER77130,
+    EMP_NOV_2017 = ER77131,
+    EMP_DEC_2017 = ER77132,
+
+    EMP_JAN_2019 = ER81457,
+    EMP_FEB_2019 = ER81458,
+    EMP_MAR_2019 = ER81459,
+    EMP_APR_2019 = ER81460,
+    EMP_MAY_2019 = ER81461,
+    EMP_JUN_2019 = ER81462,
+    EMP_JUL_2019 = ER81463,
+    EMP_AUG_2019 = ER81464,
+    EMP_SEP_2019 = ER81465,
+    EMP_OCT_2019 = ER81466,
+    EMP_NOV_2019 = ER81467,
+    EMP_DEC_2019 = ER81468
+  )
+
+``` 
+
+```{r GENERATE_EVEN_EMP , warning=FALSE, message=FALSE}
+years <- seq(2001, 2019, by = 2)
+months <- c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", 
+            "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
+
+for (year in years) {
+  for (month in months) {
+    une_col <- paste("UNE_", month, "_", year, sep = "")
+    out_col <- paste("OUT_", month, "_", year, sep = "")
+    new_var_name <- paste("EMP_", month, "_", year + 1, sep = "")
+    
+    data <- data %>% mutate(!!new_var_name := case_when(
+      !!sym(une_col) == 0 & !!sym(out_col) == 1 ~ 1,
+      TRUE ~ 0
+    ))
+  }
+}
+```
+
+```{r rename_variables_WEIGHT , warning=FALSE, message=FALSE}
+data <- data %>%
+  rename(
+    WEIGHT_1997 = ER12084,
+    WEIGHT_1999 = ER16518,
+    WEIGHT_2001 = ER20394,
+    WEIGHT_2003 = ER24179,
+    WEIGHT_2005 = ER28078,
+    WEIGHT_2007 = ER41069,
+    WEIGHT_2009 = ER47012,
+    WEIGHT_2011 = ER52436,
+    WEIGHT_2013 = ER58257,
+    WEIGHT_2015 = ER65492,
+    WEIGHT_2017 = ER71570,
+    WEIGHT_2019 = ER77631,
+    WEIGHT_2021 = ER81958
+  ) 
+data <- data %>%
+  select(-WEIGHT_1997, -WEIGHT_1999, -WEIGHT_2021)
+```  
+
+```{r rename_variables_RELEASE_NUMBER , warning=FALSE, message=FALSE}
+data <- data %>%
+  rename(
+    RELEASE_NUMBER_1997 = ER10001,
+    RELEASE_NUMBER_1998 = V21601,
+    RELEASE_NUMBER_1999 = ER13001,
+    RELEASE_NUMBER_2001 = ER17001,
+    RELEASE_NUMBER_2003 = ER21001,
+    RELEASE_NUMBER_2005 = ER25001,
+    RELEASE_NUMBER_2007 = ER36001,
+    RELEASE_NUMBER_2009 = ER42001,
+    RELEASE_NUMBER_2011 = ER47301,
+    RELEASE_NUMBER_2013 = ER53001,
+    RELEASE_NUMBER_2015 = ER60001,
+    RELEASE_NUMBER_2017 = ER66001,
+    RELEASE_NUMBER_2019 = ER72001,
+    RELEASE_NUMBER_2021 = ER78001
+  ) %>%
+  mutate(
+    RELEASE_NUMBER_2022 = RELEASE_NUMBER_2021
+  )
+
+```  
+
+```{r delete_VARIABLES , warning=FALSE, message=FALSE}
+variable_prefixes <- c("ID_", "RELEASE_NUMBER_", "INTERVIEW_", "SEQUENCE_")
+
+columns_to_keep <- !Reduce(`|`, lapply(variable_prefixes, function(prefix) startsWith(names(data), prefix)))
+
+data <- data[, columns_to_keep]
+
+
+```
+
+```{r GENERATE NEW VARIABLES FOR ALL MONTH OF ALL YEARS 1997_2022, warning=FALSE, message=FALSE}
+
+variable_types <- c("SEX_","IN_SAMPLE_" )
+years <- 2001:2020
+months <- c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", 
+            "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
+
+for (variable_type in variable_types) {
+  for (year in years) {
+    for (month in months) {
+      new_var_name <- paste(variable_type, month, "_", year, sep = "")
+      old_var_name <- paste(variable_type, sep = "")  
+      
+      data <- data %>%
+        mutate(!!sym(new_var_name) := !!sym(old_var_name))
+    }
+  }
+  
+}
+
+data <- data %>%
+  select(-SEX_, -IN_SAMPLE_)
+
+``` 
+
+
+```{r GENERATE NEW VARIABLES FOR ALL MONTH OF ALL YEARS 1997_2022, warning=FALSE, message=FALSE}
+
+variable_types <- c("WEIGHT_", "RELATION_")
+years <- 2001:2019
+months <- c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", 
+            "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
+
+for (year in years) {
+    for (variable_type in variable_types) {
+        new_var_name <- paste(variable_type, year + 1, sep = "") 
+        old_var_name <- paste(variable_type, year , sep = "")  
+        data <- data %>% mutate(!!sym(new_var_name) := !!sym(old_var_name))
+    }
+}
+
+variable_types <- c("WEIGHT_", "RELATION_")
+years <- 2001:2020
+months <- c("JAN", "FEB", "MAR", "APR", "MAY", "JUN", 
+            "JUL", "AUG", "SEP", "OCT", "NOV", "DEC")
+
+for (variable_type in variable_types) {
+  for (year in years) {
+    for (month in months) {
+      new_var_name <- paste(variable_type, month, "_", year, sep = "")
+      old_var_name <- paste(variable_type, year, sep = "")  
+      
+      data <- data %>%
+        mutate(!!sym(new_var_name) := !!sym(old_var_name))
+    }
+  }
+  
+}
+
+variable_types <- c("WEIGHT_", "RELATION_")
+years <- 2001:2021
+
+for (variable_type in variable_types) {
+  for (year in years) {
+    name_var <- paste(variable_type, year, sep = "")
+    data <- data %>%
+      select(-matches(name_var)) 
+  }
+}
+
+``` 
+
+```{r filter DATA, warning=FALSE, message=FALSE}
+data <- data %>%
+  filter(if_all(starts_with("RELATION_"), ~ . == 10))
+data <- data %>%
+  filter(if_all(starts_with("IN_SAMPLE_"), ~ . == 1))
+```
+
+```{r WRITE DATA, warning=FALSE, message=FALSE}
+write_dta(data, "D:/PSID_SHELF/06_Employment/mydata.dta")
+```
+
+duplicates drop ID, force
+
+
+reshape long WEIGHT_ RELATION_  SEX_ IN_SAMPLE_ UNE_ OUT_ EMP_, i(ID) j(MONTH_YEAR) string
+

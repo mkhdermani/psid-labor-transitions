@@ -1,0 +1,76 @@
+using DataFrames, CSV, Dates, Plots, StatsPlots
+
+# Import data
+df = CSV.File("PANEL_CPS.xlsx", DataFrame, sheet="Sheet2")
+
+# Rename columns
+rename!(df, [
+    :LNU02000000 => :Employment_Level,
+    :LNU07000000 => :EE,
+    :LNU07100000 => :UE,
+    :LNU07200000 => :IE,
+    :LNU07300000 => :ME,
+    :LNU03000000 => :Unemployment_Level,
+    :LNU07400000 => :EU,
+    :LNU07500000 => :UU,
+    :LNU07600000 => :IU,
+    :LNU07700000 => :MU,
+    :LNU05000000 => :Not_in_Labor_Force,
+    :LNU07800000 => :EI,
+    :LNU07900000 => :UI,
+    :LNU08000000 => :II,
+    :LNU08100000 => :MI,
+    :LNU08200000 => :EM,
+    :LNU08300000 => :UM,
+    :LNU08400000 => :IM
+])
+
+# Process date
+df.date_num = map(x -> Date(parse(Int, x[end-3:end]), monthnumber(x[1:3]), 1), df.YEAR_MONTH)
+
+# Sort and generate lagged variables
+sort!(df, :date_num)
+for col in [:Employment_Level, :Unemployment_Level, :Not_in_Labor_Force]
+    df[!, Symbol(col, "_lag")] = [missing; df[!, col][1:end-1]]
+end
+
+# Calculate transition variables
+for var in ["EE", "UU", "II", "EU", "UE", "IE", "EI", "IU", "UI"]
+    df[!, Symbol("tr_", var)] = -log.(1 .- (df[!, Symbol(var)] ./ df[!, Symbol(Symbol(var), "_lag")]))
+end
+
+# Define function for plotting transition rates
+function plot_transition_rates(df, var_list, start_idx, end_idx, title_prefix, file_prefix)
+    for var in var_list
+        plot(df.date_num[start_idx:end_idx], df[!, Symbol("tr_", var)][start_idx:end_idx],
+             title = "$(title_prefix) $(var)", xlabel = "Year", ylabel = "Transition Rate",
+             legend = false)
+        savefig("$(file_prefix)_$(var).png")
+    end
+end
+
+# Plot specified transition rates
+plot_transition_rates(df, ["EU", "UE", "EI", "IE", "UI", "IU", "EE", "UU", "II"], 517, 926, "Transition Rate:", "tr")
+
+# Save updated DataFrame
+CSV.write("panel_cps_updated.csv", df)
+
+# Merge with NLSY79 data
+nlsy79_df = CSV.read("NLSY79_SABOOK.csv", DataFrame) # Change the path as needed
+merged_df = outerjoin(df, nlsy79_df, on = :date_num, makeunique = true, indicator = :merge)
+
+# Filter for matched records
+merged_df = filter(row -> row.merge == :both, merged_df)
+
+# Plot comparison transition rates between CPS and NLSY79
+function plot_comparison_rates(df, var_list, cps_prefix, nlsy_prefix, title_prefix, file_prefix)
+    for var in var_list
+        p = plot(df.date_num, [df[!, Symbol(cps_prefix, var)], df[!, Symbol(nlsy_prefix, var)]],
+                 label=["CPS" "NLSY79"], title = "$(title_prefix) $(var)", xlabel = "Year", ylabel = "Transition Rate")
+        savefig("$(file_prefix)_$(var)_comparison.png")
+    end
+end
+
+# Plot comparisons for specified transition rates
+plot_comparison_rates(merged_df, ["EU", "UE", "EI", "IE", "UI", "IU", "EE", "UU", "II"], "tr_", "", "Transition Rate:", "tr")
+

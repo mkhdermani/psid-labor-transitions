@@ -1,0 +1,194 @@
+---
+title: "Wealth_PSID"
+author: "Mohsen Khalili"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+library(haven)
+library(dplyr)
+```
+
+```{r}
+Wealth <- read_dta("D:/PSID_SHELF/Karlanser/Karlanser/PSID/Data/Wealth/Wealth.dta")
+View(Wealth)
+```
+
+```{r}
+
+Wealth <- Wealth %>%
+  mutate(
+    TOTASSN_weighted = TOTASSN * FW,
+    TOTASS2N_weighted = TOTASS2N * FW,
+    TOTASS3N_weighted = TOTASS3N * FW,
+    TOTDEBN_weighted = TOTDEBN * FW,
+    TOTDEB2N_weighted = TOTDEB2N * FW,
+    TOTDEB3N_weighted = TOTDEB3N * FW,
+    WLTHHOMETOTN_weighted = WLTHHOMETOTN * FW,
+    WLTHHOMEASSN_weighted = WLTHHOMEASSN * FW,
+    WLTHHOMEDEBN_weighted = WLTHHOMEDEBN * FW,
+    WLTHREALTOTN_weighted = WLTHREALTOTN * FW,
+    WLTHREALASSN_weighted = WLTHREALASSN * FW,
+    WLTHREALDEBN_weighted = WLTHREALDEBN * FW,
+    WLTHFBIZTOTN_weighted = WLTHFBIZTOTN * FW,
+    WLTHFBIZASSN_weighted = WLTHFBIZASSN * FW,
+    WLTHFBIZDEBN_weighted = WLTHFBIZDEBN * FW,
+    WLTHSAVETOTN_weighted = WLTHSAVETOTN * FW,
+    WLTHSAVEBNDN_weighted = WLTHSAVEBNDN * FW,
+    WLTHFUNDTOTN_weighted = WLTHFUNDTOTN * FW,
+    WLTHFUNDSTKN_weighted = WLTHFUNDSTKN * FW,
+    WLTHFUNDIRAN_weighted = WLTHFUNDIRAN * FW,
+    WLTHAUTOTOTN_weighted = WLTHAUTOTOTN * FW,
+    WLTHOASSTOTN_weighted = WLTHOASSTOTN * FW,
+    WLTHODEBTOTN_weighted = WLTHODEBTOTN * FW,
+    WLTHODEBSTUN_weighted = WLTHODEBSTUN * FW,
+    WLTHODEBMEDN_weighted = WLTHODEBMEDN * FW,
+    WLTHODEBLEGN_weighted = WLTHODEBLEGN * FW,
+    WLTHODEBFAMN_weighted = WLTHODEBFAMN * FW,
+    WLTHODEBREMN_weighted = WLTHODEBREMN * FW
+  )
+
+
+```
+
+```{r}
+Wealth_summary <- Wealth %>%
+  group_by(YEAR) %>%
+  summarise(
+    sum_FW = sum(FW, na.rm = TRUE), 
+    across(ends_with("_weighted"), sum, na.rm = TRUE)
+  ) %>%
+  mutate(
+    across(ends_with("_weighted"), ~ ./sum_FW)
+  ) %>%
+  ungroup()
+
+```
+
+```{r}
+library(dplyr)
+library(purrr)
+
+weighted_vars <- c("TOTASSN_weighted", "TOTASS2N_weighted", "TOTASS3N_weighted", 
+                   "TOTDEBN_weighted", "TOTDEB2N_weighted", "TOTDEB3N_weighted", 
+                   "WLTHHOMETOTN_weighted", "WLTHHOMEASSN_weighted", "WLTHHOMEDEBN_weighted", 
+                   "WLTHREALTOTN_weighted", "WLTHREALASSN_weighted", "WLTHREALDEBN_weighted", 
+                   "WLTHFBIZTOTN_weighted", "WLTHFBIZASSN_weighted", "WLTHFBIZDEBN_weighted", 
+                   "WLTHSAVETOTN_weighted", "WLTHSAVEBNDN_weighted", "WLTHFUNDTOTN_weighted", 
+                   "WLTHFUNDSTKN_weighted", "WLTHFUNDIRAN_weighted", "WLTHAUTOTOTN_weighted", 
+                   "WLTHOASSTOTN_weighted", "WLTHODEBTOTN_weighted", "WLTHODEBSTUN_weighted", 
+                   "WLTHODEBMEDN_weighted", "WLTHODEBLEGN_weighted", "WLTHODEBFAMN_weighted", 
+                   "WLTHODEBREMN_weighted")
+
+Wealth_summary_filtered <- Wealth_summary %>%
+  filter(pmap_lgl(select(., all_of(weighted_vars)), ~ !all(unlist(list(...)) == 0)))
+
+library(rlang)
+
+```
+
+```{r}
+variable_titles <- c(
+  TOTASSN_weighted = "Total Assets (Nominal USD)",
+  TOTASS2N_weighted = "Total Assets Excl. Home (Nominal USD)",
+  TOTASS3N_weighted = "Total Assets Excl. Home/Real Estate (Nominal USD)",
+  TOTDEBN_weighted = "Total Debts (Nominal USD)",
+  TOTDEB2N_weighted = "Total Debts Excl. Home (Nominal USD)",
+  TOTDEB3N_weighted = "Total Debts Excl. Home/Real Estate (Nominal USD)",
+  WLTHHOMETOTN_weighted = "Wealth Component: Primary Home Total Value (Nominal USD)",
+  WLTHHOMEASSN_weighted = "Wealth Component: Primary Home Value (Nominal USD)",
+  WLTHHOMEDEBN_weighted = "Wealth Component: Primary Home Mortgage (Nominal USD)",
+  WLTHREALTOTN_weighted = "Wealth Component: Real Estate Total Value (Nominal USD)",
+  WLTHREALASSN_weighted = "Wealth Component: Real Estate Assets (Nominal USD)",
+  WLTHREALDEBN_weighted = "Wealth Component: Real Estate Debts (Nominal USD)",
+  WLTHFBIZTOTN_weighted = "Wealth Component: Farm/Business Total Value (Nominal USD)",
+  WLTHFBIZASSN_weighted = "Wealth Component: Farm/Business Assets (Nominal USD)",
+  WLTHFBIZDEBN_weighted = "Wealth Component: Farm/Business Debts (Nominal USD)",
+  WLTHSAVETOTN_weighted = "Wealth Component: Savings Total Value (Nominal USD)",
+  WLTHSAVEBNDN_weighted = "Wealth Component: Savings in Bonds/CDs (Nominal USD)",
+  WLTHFUNDTOTN_weighted = "Wealth Component: Investments Total Value (Nominal USD)",
+  WLTHFUNDSTKN_weighted = "Wealth Component: Investments in Stocks (Nominal USD)",
+  WLTHFUNDIRAN_weighted = "Wealth Component: Investments in IRAs/Annuities (Nominal USD)",
+  WLTHAUTOTOTN_weighted = "Wealth Component: Vehicles Total Value (Nominal USD)",
+  WLTHOASSTOTN_weighted = "Wealth Component: Other Assets Total Value (Nominal USD)",
+  WLTHODEBTOTN_weighted = "Wealth Component: Other Debts Total Value (Nominal USD)",
+  WLTHODEBSTUN_weighted = "Wealth Component: Educational Loans (Nominal USD)",
+  WLTHODEBMEDN_weighted = "Wealth Component: Medical Bills (Nominal USD)",
+  WLTHODEBLEGN_weighted = "Wealth Component: Legal Bills (Nominal USD)",
+  WLTHODEBFAMN_weighted = "Wealth Component: Loans from Family (Nominal USD)",
+  WLTHODEBREMN_weighted = "Wealth Component: Remaining Debts (Nominal USD)"
+)
+
+```
+
+```{r}
+library(ggplot2)
+
+# Define unique titles for each variable
+titles <- c(
+  "Yearly Trends of Total Assets",
+  "Yearly Trends of Total Assets Excl. Home",
+  "Yearly Trends of Total Assets Excl. Home/Real Estate",
+  "Yearly Trends of Total Debts",
+  "Yearly Trends of Total Debts Excl. Home",
+  "Yearly Trends of Total Debts Excl. Home/Real Estate",
+  "Yearly Trends of Wealth Component: Primary Home Total Value",
+  "Yearly Trends of Wealth Component: Primary Home Value",
+  "Yearly Trends of Wealth Component: Primary Home Mortgage",
+  "Yearly Trends of Wealth Component: Real Estate Total Value",
+  "Yearly Trends of Wealth Component: Real Estate Assets",
+  "Yearly Trends of Wealth Component: Real Estate Debts",
+  "Yearly Trends of Wealth Component: Farm/Business Total Value",
+  "Yearly Trends of Wealth Component: Farm/Business Assets",
+  "Yearly Trends of Wealth Component: Farm/Business Debts",
+  "Yearly Trends of Wealth Component: Savings Total Value",
+  "Yearly Trends of Wealth Component: Savings in Bonds/CDs",
+  "Yearly Trends of Wealth Component: Investments Total Value",
+  "Yearly Trends of Wealth Component: Investments in Stocks",
+  "Yearly Trends of Wealth Component: Investments in IRAs/Annuities",
+  "Yearly Trends of Wealth Component: Vehicles Total Value",
+  "Yearly Trends of Wealth Component: Other Assets Total Value",
+  "Yearly Trends of Wealth Component: Other Debts Total Value",
+  "Yearly Trends of Wealth Component: Educational Loans",
+  "Yearly Trends of Wealth Component: Medical Bills",
+  "Yearly Trends of Wealth Component: Legal Bills",
+  "Yearly Trends of Wealth Component: Loans from Family",
+  "Yearly Trends of Wealth Component: Remaining Debts"
+)
+
+# Loop through each variable and create a plot
+plots <- lapply(seq_along(weighted_vars), function(i) {
+  plot <- ggplot(Wealth_summary, aes(x = YEAR, y = .data[[weighted_vars[i]]])) +
+    geom_line() +
+    labs(
+      title = titles[i],
+      x = "Year",
+      y = "Value (Weighted)"
+    )
+  
+  return(plot)
+})
+
+# Save each plot to a separate file
+save_directory <- "D:/PSID_SHELF/Karlanser/Karlanser/PSID/Graph"
+for (i in seq_along(plots)) {
+  ggsave(file.path(save_directory, paste0("trend_plot_", i, ".png")), plots[[i]], width = 8, height = 6)
+}
+
+
+```
+
+```{r}
+
+```
+
+```{r}
+
+```
+
