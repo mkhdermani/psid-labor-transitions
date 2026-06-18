@@ -1,3 +1,15 @@
+*===============================================================================
+* shimer_comparison.do   (CPS-BLS / compare_psid)
+*-------------------------------------------------------------------------------
+* Project : PSID_SHELF
+* Author  : Mohsen Khalili
+* Purpose : Aggregate the monthly CPS transition rates (tr_EU, tr_UE, tr_IE,
+*           tr_EI, tr_IU, tr_UI) to QUARTERLY means and plot them, so they can
+*           be compared against the PSID series on the same time scale.
+* Input   : panel_cps.dta   (monthly CPS labour-force flows / transition rates)
+* Output  : quarterly transition-rate plots
+*===============================================================================
+
 clear
 use panel_cps.dta
 

@@ -1,6 +1,20 @@
+*===============================================================================
+* transition.do   (NLSY79 — weekly)
+*-------------------------------------------------------------------------------
+* Project : PSID_SHELF
+* Author  : Mohsen Khalili
+* Purpose : Build WEEKLY Employment / Unemployment / Inactivity (E/U/I)
+*           transition rates for the NLSY79 (1979) cohort.
+*           Steps: tidy the weekly STATUS_WK_* status array -> set the person
+*           panel with tsset -> compare each week's status to the previous week
+*           -> aggregate weighted transition counts into rates.
+* Input   : weekly.dta   (NLSY79 weekly labour-force-status array)
+* Output  : weekly transition-rate series / graphs (see 02_NLSY79/output)
+*===============================================================================
+
 clear
 
-* Read CPS data file
+* Read the NLSY79 weekly employment-status file
 use "weekly.dta", clear
 
 // List all variables

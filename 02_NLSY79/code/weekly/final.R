@@ -1,3 +1,15 @@
+#===============================================================================
+# final.R   (NLSY79 - weekly)
+#-------------------------------------------------------------------------------
+# Project : PSID_SHELF
+# Author  : Mohsen Khalili
+# Purpose : Attach the correct NLSY79 yearly sampling weight (SAMPWEIGHT_<year>)
+#           to every weekly observation, based on that observation's calendar
+#           year, so the weekly E/U/I transition rates can be population-weighted.
+# Input   : weekly_long_format_with_time_and_weights.dta
+# Output  : the same panel with a single `weight` column added.
+#===============================================================================
+
 # Install and load the required libraries
 
 library(dplyr)

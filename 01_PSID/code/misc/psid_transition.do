@@ -1,4 +1,18 @@
 
+*===============================================================================
+* psid_transition.do
+*-------------------------------------------------------------------------------
+* Project : PSID_SHELF
+* Author  : Mohsen Khalili
+* Purpose : Turn a raw PSID extract into a usable employment panel. First rename
+*           the cryptic PSID variable codes (ER....) to readable names per wave
+*           (age, sex, employment_status, labor_income, wages, wealth, weight),
+*           then build Employment / Unemployment / Inactivity (E/U/I) transition
+*           rates over time.
+* Input   : a wide PSID extract in memory (raw ER... variables, 1997-2021 waves)
+* Output  : labelled variables + E/U/I transition-rate series
+*===============================================================================
+
 rename ER10001 fam_release_1997
 rename ER10002 fam_interview_1997
 rename ER10009 age_1997

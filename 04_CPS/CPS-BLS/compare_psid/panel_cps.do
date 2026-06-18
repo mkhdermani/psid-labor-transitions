@@ -1,3 +1,17 @@
+*===============================================================================
+* panel_cps.do   (CPS-BLS / compare_psid)
+*-------------------------------------------------------------------------------
+* Project : PSID_SHELF
+* Author  : Mohsen Khalili
+* Purpose : Load the BLS published labour-force-flow series (CPS, "LNU..." codes)
+*           from PANEL_CPS.xlsx and rename them to readable names -- the
+*           employment / unemployment / not-in-labour-force levels and the gross
+*           flows (EE, EU, EI, UE, UU, UI, IE, IU, II, ...). Builds the monthly
+*           CPS flows panel used in the comparison scripts.
+* Input   : PANEL_CPS.xlsx   (BLS series, Sheet2)
+* Output  : monthly CPS labour-force-flows panel (saved as panel_cps.dta)
+*===============================================================================
+
 clear
 
 import excel "PANEL_CPS.xlsx", sheet("Sheet2") firstrow

@@ -1,3 +1,19 @@
+*===============================================================================
+* cps_transition.do   (CPS-MINE)
+*-------------------------------------------------------------------------------
+* Project : PSID_SHELF
+* Author  : Mohsen Khalili
+* Purpose : Build MONTHLY Employment / Unemployment / Inactivity (E/U/I)
+*           transition rates from IPUMS-CPS micro-data. Sets the person panel
+*           (cpsidv x month), compares each month's empstat to the previous
+*           month, and aggregates population-weighted (wtfinl) transition counts
+*           into rates.
+* Note    : empstat codes -> employed: 1/10/12 ; unemployed: 20-22 ;
+*           inactive (not in labour force): 30-36.
+* Input   : cps.dta   (IPUMS CPS: cpsidv, empstat, wtfinl, year, month)
+* Output  : CPS transition-rate series / graphs (see 04_CPS/CPS-MINE/Graph)
+*===============================================================================
+
 * Clear existing data
 clear
 

@@ -60,6 +60,10 @@ __pycache__/
 # --- Stata -------------------------------------------------------------------
 *.smcl
 
+# --- Local helper scripts (machine-specific, never publish) ------------------
+PUSH_TO_GITHUB.bat
+*.bat
+
 # --- Editors / OS ------------------------------------------------------------
 .idea/
 .vscode/

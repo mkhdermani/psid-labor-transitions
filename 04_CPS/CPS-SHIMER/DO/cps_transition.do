@@ -1,6 +1,17 @@
+*===============================================================================
+* cps_transition.do   (CPS-SHIMER)
+*-------------------------------------------------------------------------------
+* Project : PSID_SHELF
+* Author  : Mohsen Khalili
+* Purpose : Plot the CPS E/U/I transition rates computed with Shimer's (2012)
+*           method and export one PNG per flow (EU, UE, EI, IE, UI, IU).
+* Input   : shimer.dta   (CPS transition rates, Shimer adjustment, by year)
+* Output  : <flow>_shimer.png  in 04_CPS/CPS-SHIMER/
+*===============================================================================
+
 clear
 
-* Read CPS data file
+* Read the Shimer-method CPS transition-rate file
 use "shimer.dta", clear
 
 * Plot the time series of transition rates and save each graph as PNG

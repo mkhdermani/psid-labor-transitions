@@ -1,6 +1,19 @@
+*===============================================================================
+* transition.do   (NLSY79 — monthly)
+*-------------------------------------------------------------------------------
+* Project : PSID_SHELF
+* Author  : Mohsen Khalili
+* Purpose : Build MONTHLY Employment / Unemployment / Inactivity (E/U/I)
+*           transition rates for the NLSY79 (1979) cohort. Starts from the
+*           weekly status array, converts the week index to a calendar date
+*           (week 0 = 25 Dec 1977), then aggregates transitions to the month.
+* Input   : weekly.dta   (NLSY79 weekly labour-force-status array)
+* Output  : monthly transition-rate series / graphs (see 02_NLSY79/output)
+*===============================================================================
+
 clear
 
-* Read CPS data file
+* Read the NLSY79 weekly employment-status file
 use "weekly.dta", clear
 
 // List all variables
