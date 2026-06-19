@@ -847,7 +847,7 @@ data <- data %>%
 ```
 
 ```{r WRITE DATA, warning=FALSE, message=FALSE}
-write_dta(data, "D:/PSID_SHELF/06_Employment/mydata.dta")
+write_dta(data, "D:/PSID_SHELF/06_Employment/psid_employment_wide.dta")
 ```
 
 duplicates drop ID, force

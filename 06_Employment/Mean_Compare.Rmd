@@ -37,7 +37,7 @@ library(lubridate)
 ```
 
 ```{r loadd_ata, warning=FALSE, message=FALSE}
-data <- read_dta("D:/PSID_SHELF/06_Employment/reshape.dta")
+data <- read_dta("D:/PSID_SHELF/06_Employment/psid_employment_long.dta")
 ```
 
 ```{r data_preprocessing}

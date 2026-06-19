@@ -45,7 +45,7 @@ write-ups — implemented in **Stata, R, Julia and Python**.
 <table>
   <tr>
     <td width="50%" valign="top">
-      <img src="01_PSID/output/graphs/weighted_avg_wealth.png" width="100%"/><br/>
+      <img src="01_PSID/output/graphs/total_wealth.png" width="100%"/><br/>
       <sub><b>PSID — average family wealth</b> (primary-home component, family-size adjusted).
       The long climb, the 2007–08 housing collapse, and the subsequent recovery are all visible.</sub>
     </td>
