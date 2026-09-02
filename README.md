@@ -153,10 +153,10 @@ The raw microdata are free to registered users from the official providers:
 
 ## 👤 Author
 
-**Mohsen Khalili (Dermani)** — Research Assistant, empirical labour economics
+**Mohsen Khalili Dermani** — Research Assistant, empirical labour economics
 ✉️ mkhdermani@gmail.com · 🔗 [LinkedIn](https://www.linkedin.com/in/mohsenkhalili-dermani-3b08a5156)
 
-This work was carried out as a research assistant for **E. Sepahsalari**.
+This work was carried out as a research assistant for **A. Sepahsalari**.
 
 ---
 

@@ -9,7 +9,7 @@ abstract: >-
   benchmarks. Code, result graphs and reports only (microdata excluded).
 type: software
 authors:
-  - family-names: "Khalili"
+  - family-names: "Khalili Dermani"
     given-names: "Mohsen"
     email: mkhdermani@gmail.com
 keywords:
